@@ -1,0 +1,60 @@
+* { box-sizing: border-box; }
+body {
+  width: 340px;
+  margin: 0;
+  padding: 8px;
+  font-family: -apple-system, system-ui, sans-serif;
+  background: #fff;
+  color: #202124;
+}
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 12px;
+  border-bottom: 1px solid #eee;
+}
+#search {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 6px 4px;
+}
+#open-settings {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #5f6368;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 4px;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.app:hover { background: #f1f3f4; }
+.app img { width: 40px; height: 40px; object-fit: contain; }
+.app span {
+  font-size: 13px;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.empty { text-align: center; color: #5f6368; padding: 24px 8px; }
