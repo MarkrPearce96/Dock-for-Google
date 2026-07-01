@@ -51,3 +51,11 @@ export function moveAppTo(list, id, toIndex) {
   next.splice(clamped, 0, item);
   return next;
 }
+
+export function addAppAt(list, input, index) {
+  const app = makeApp(input);
+  const i = Math.max(0, Math.min(index, list.length));
+  const next = [...list];
+  next.splice(i, 0, app);
+  return next;
+}
