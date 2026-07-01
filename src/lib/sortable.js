@@ -27,6 +27,7 @@ export function createDragController(config) {
   function begin(e) {
     st.dragging = true;
     st.source.onDragStart?.();
+    document.getSelection?.()?.removeAllRanges?.();
     const tile = st.source.tileEl;
     const r = tile.getBoundingClientRect();
     st.offX = e.clientX - r.left;
@@ -98,7 +99,7 @@ export function createDragController(config) {
         t.style.transition = 'none';
         t.style.transform = `translate(${dx}px, ${dy}px)`;
         requestAnimationFrame(() => {
-          t.style.transition = 'transform 160ms ease';
+          t.style.transition = 'transform 240ms ease';
           t.style.transform = '';
         });
       }
