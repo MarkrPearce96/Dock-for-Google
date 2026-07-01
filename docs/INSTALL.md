@@ -1,7 +1,7 @@
 # Installing App Launcher in Safari
 
 ## One-time build
-1. Regenerate icons if needed: `node tools/make-icons.mjs`
+1. Regenerate icons if needed: `node tools/make-icons.mjs` (only needed if the icon PNGs are missing or you changed the generator; the committed repo already includes the generated icons, so first-time users can skip this).
 2. Run the converter:
    ```
    xcrun safari-web-extension-converter "src" --project-location "." \
@@ -34,3 +34,14 @@ Unsigned extensions turn off when Safari quits. To keep it enabled:
 ## Updating the app list code later
 Edit files in `src/`, re-run the converter (step 2) with `--force`, then rebuild with the **App Launcher** scheme in Xcode.
 The stored app list persists across rebuilds (it lives in Safari's extension storage).
+
+## Verify it works
+After enabling the extension, confirm each of these:
+- [ ] Popup opens showing the seeded 8-app grid (Docs, Slides, Sheets, Drive, Gmail, Photos, Maps, Translate).
+- [ ] Typing `dr` in the search box narrows the grid to Drive only.
+- [ ] Clicking an app icon opens its URL in a new tab.
+- [ ] The gear (⚙) button in the popup opens the settings page.
+- [ ] Adding an app with a valid URL saves it, and it appears in the popup grid.
+- [ ] Adding an app with an invalid URL shows an inline error and does not save.
+- [ ] Edit changes a name/URL; Delete removes an app; the ↑/↓ buttons reorder, and the popup reflects the new order.
+- [ ] Entering a custom icon URL overrides the auto-fetched favicon.
