@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="search-bar">
+    <input id="search" type="text" placeholder="Search and launch" autocomplete="off" autofocus />
+    <button id="open-settings" title="Settings" aria-label="Settings">&#9881;</button>
+  </div>
+  <div id="grid" class="grid"></div>
+  <p id="empty" class="empty" hidden>No apps yet — open Settings to add some.</p>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
