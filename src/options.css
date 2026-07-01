@@ -109,6 +109,8 @@ input[type=text], input[type=url] {
 .sortable-ghost { opacity: 0.35; }
 .sortable-drag { opacity: 0.9; }
 .sortable-chosen { cursor: grabbing; }
+/* Suppress the tile hover background while a drag is in progress. */
+body.sorting .tile:hover { background: transparent; }
 
 /* Available panel becomes a Remove drop zone while dragging a shortcut.
    Content is faded with opacity (not hidden) so the grid stays a valid

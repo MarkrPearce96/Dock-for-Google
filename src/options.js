@@ -142,8 +142,14 @@ new Sortable(myGrid, {
   draggable: '.tile.mine',
   filter: '.remove',
   preventOnFilter: false,
-  onStart: () => availablePanel.classList.add('removing'),
-  onEnd: () => availablePanel.classList.remove('removing', 'remove-hot'),
+  onStart: () => {
+    document.body.classList.add('sorting');
+    availablePanel.classList.add('removing');
+  },
+  onEnd: () => {
+    document.body.classList.remove('sorting');
+    availablePanel.classList.remove('removing', 'remove-hot');
+  },
   onMove: (evt) => {
     availablePanel.classList.toggle('remove-hot', evt.to === availableGrid);
     return true;
@@ -157,6 +163,8 @@ new Sortable(availableGrid, {
   animation: 200,
   sort: false,
   draggable: '.tile',
+  onStart: () => document.body.classList.add('sorting'),
+  onEnd: () => document.body.classList.remove('sorting'),
   onAdd: onDropToRemove,
 });
 
