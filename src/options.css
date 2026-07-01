@@ -1,23 +1,51 @@
 * { box-sizing: border-box; }
+:root {
+  --bg: #f8f9fa;
+  --fg: #202124;
+  --muted: #5f6368;
+  --card: #fff;
+  --border: #e0e0e0;
+  --hover: #f1f3f4;
+  --field-bg: #fff;
+  --field-border: #ccc;
+  --secondary-bg: #e8eaed;
+  --secondary-fg: #202124;
+  --accent: #4f46e5;
+  --danger: #c5221f;
+  --danger-bg: #fce8e6;
+  --danger-border: #f28b82;
+}
+[data-theme="dark"] {
+  --bg: #1c1c1e;
+  --fg: #e8eaed;
+  --muted: #9aa0a6;
+  --card: #2c2c2e;
+  --border: #3a3a3c;
+  --hover: #3a3a3c;
+  --field-bg: #3a3a3c;
+  --field-border: #4a4a4c;
+  --secondary-bg: #3a3a3c;
+  --secondary-fg: #e8eaed;
+  --danger-bg: #4a2b2b;
+}
 body {
   font-family: -apple-system, system-ui, sans-serif;
-  color: #202124;
-  background: #f8f9fa;
-  color-scheme: light;
+  color: var(--fg);
+  background: var(--bg);
   margin: 0;
   padding: 24px;
 }
 main { max-width: 760px; margin: 0 auto; }
 h1 { font-size: 22px; margin: 0 0 4px; }
-.subtitle { color: #5f6368; font-size: 13px; margin: 0 0 20px; }
+.subtitle { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
 
 .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
 
 .panel {
   position: relative;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -31,8 +59,10 @@ h1 { font-size: 22px; margin: 0 0 4px; }
   max-width: 170px;
   font-size: 13px;
   padding: 6px 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--field-border);
   border-radius: 999px;
+  background: var(--field-bg);
+  color: var(--fg);
 }
 
 .grid {
@@ -58,7 +88,7 @@ h1 { font-size: 22px; margin: 0 0 4px; }
   -webkit-user-select: none;
   user-select: none;
 }
-.tile:hover { background: #f1f3f4; }
+.tile:hover { background: var(--hover); }
 .tile img { width: 40px; height: 40px; object-fit: contain; border-radius: 9px; pointer-events: none; }
 .tile-label {
   font-size: 12px; text-align: center; max-width: 100%;
@@ -68,14 +98,14 @@ h1 { font-size: 22px; margin: 0 0 4px; }
 .tile.mine { cursor: grab; }
 .tile.mine:active { cursor: grabbing; }
 .tile.dragging { opacity: 0.5; }
-.tile.drag-over { box-shadow: inset 0 0 0 2px #4f46e5; }
+.tile.drag-over { box-shadow: inset 0 0 0 2px var(--accent); }
 .tile .remove {
   position: absolute;
   top: 2px; right: 2px;
   width: 18px; height: 18px;
   padding: 0;
   border: none; border-radius: 50%;
-  background: #e8eaed; color: #5f6368;
+  background: var(--secondary-bg); color: var(--muted);
   font-size: 12px; line-height: 18px;
   text-align: center;
   cursor: pointer;
@@ -83,27 +113,27 @@ h1 { font-size: 22px; margin: 0 0 4px; }
 }
 .tile.mine:hover .remove { display: block; }
 
-.empty { color: #5f6368; font-size: 13px; text-align: center; padding: 24px 8px; margin: auto 0; }
+.empty { color: var(--muted); font-size: 13px; text-align: center; padding: 24px 8px; margin: auto 0; }
 
 .panel-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
 button {
   font-size: 14px; padding: 8px 14px; border: none; border-radius: 8px;
-  background: #4f46e5; color: #fff; cursor: pointer;
+  background: var(--accent); color: #fff; cursor: pointer;
 }
-button.secondary { background: #e8eaed; color: #202124; }
+button.secondary { background: var(--secondary-bg); color: var(--secondary-fg); }
 
 .card {
-  background: #fff; border: 1px solid #e0e0e0; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
   padding: 16px; margin-top: 16px; display: flex; flex-direction: column; gap: 10px;
 }
 .card h2 { font-size: 15px; margin: 0; }
 label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
 input[type=text], input[type=url], input[type=search] {
-  font-size: 14px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;
-  background: #fff; color: #202124;
+  font-size: 14px; padding: 8px; border: 1px solid var(--field-border); border-radius: 8px;
+  background: var(--field-bg); color: var(--fg);
 }
-.error { color: #c5221f; font-size: 13px; margin: 0; }
+.error { color: var(--danger); font-size: 13px; margin: 0; }
 .form-actions { display: flex; gap: 8px; }
 
 /* Create-custom-shortcut modal */
@@ -113,8 +143,8 @@ input[type=text], input[type=url], input[type=search] {
   padding: 0;
   width: min(420px, calc(100vw - 40px));
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  background: #fff;
-  color: #202124;
+  background: var(--card);
+  color: var(--fg);
 }
 .modal::backdrop { background: rgba(0, 0, 0, 0.4); }
 .modal form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -126,12 +156,9 @@ input[type=text], input[type=url], input[type=search] {
 .sortable-ghost { opacity: 0.35; }
 .sortable-drag { opacity: 0.9; }
 .sortable-chosen { cursor: grabbing; }
-/* Suppress the tile hover background while a drag is in progress. */
 body.sorting .tile:hover { background: transparent; }
 
-/* Available panel becomes a Remove drop zone while dragging a shortcut.
-   Content is faded with opacity (not hidden) so the grid stays a valid
-   drop target under the overlay; the overlay itself ignores pointer events. */
+/* Available panel becomes a Remove drop zone while dragging a shortcut. */
 .panel.removing #available-grid,
 .panel.removing #search,
 .panel.removing .panel-head h2 { opacity: 0; }
@@ -143,13 +170,13 @@ body.sorting .tile:hover { background: transparent; }
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 2px dashed #d0d0d0;
+  border: 2px dashed var(--border);
   font-size: 15px;
-  color: #5f6368;
+  color: var(--muted);
   pointer-events: none;
 }
-.panel.removing.remove-hot { background: #fce8e6; }
-.panel.removing.remove-hot::after { border-color: #f28b82; color: #c5221f; }
+.panel.removing.remove-hot { background: var(--danger-bg); }
+.panel.removing.remove-hot::after { border-color: var(--danger-border); color: var(--danger); }
 
 /* General preferences card */
 .general .toggle {
@@ -160,7 +187,16 @@ body.sorting .tile:hover { background: transparent; }
   font-size: 14px;
   cursor: pointer;
 }
-.general .toggle:has(input:disabled) { color: #9aa0a6; cursor: default; }
+.general .toggle:has(input:disabled) { color: var(--muted); cursor: default; }
+.general .toggle select {
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
 .toggle input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -169,7 +205,7 @@ body.sorting .tile:hover { background: transparent; }
   height: 22px;
   margin: 0;
   border-radius: 999px;
-  background: #ccc;
+  background: var(--field-border);
   position: relative;
   cursor: pointer;
   transition: background 150ms ease;
@@ -185,6 +221,6 @@ body.sorting .tile:hover { background: transparent; }
   background: #fff;
   transition: transform 150ms ease;
 }
-.toggle input[type="checkbox"]:checked { background: #4f46e5; }
+.toggle input[type="checkbox"]:checked { background: var(--accent); }
 .toggle input[type="checkbox"]:checked::after { transform: translateX(18px); }
 .toggle input[type="checkbox"]:disabled { opacity: 0.4; cursor: default; }

@@ -4,6 +4,7 @@ import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
+import { applyTheme } from './lib/theme.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
@@ -24,6 +25,8 @@ const prefNewTab = document.getElementById('pref-new-tab');
 const prefBackground = document.getElementById('pref-background');
 const prefSearch = document.getElementById('pref-search');
 const prefLabels = document.getElementById('pref-labels');
+const prefTheme = document.getElementById('pref-theme');
+const prefColumns = document.getElementById('pref-columns');
 
 let apps = [];
 
@@ -237,6 +240,9 @@ async function initPrefs() {
   prefSearch.checked = prefs.showSearch;
   prefLabels.checked = prefs.showLabels;
   syncBackgroundDisabled();
+  applyTheme(prefs.theme);
+  prefTheme.value = prefs.theme;
+  prefColumns.value = String(prefs.gridColumns);
 
   function save() {
     savePrefs(prefs).catch((e) => console.error('App Launcher: failed to save pref', e));
@@ -250,6 +256,15 @@ async function initPrefs() {
   prefBackground.addEventListener('change', () => { prefs.openInBackground = prefBackground.checked; save(); });
   prefSearch.addEventListener('change', () => { prefs.showSearch = prefSearch.checked; save(); });
   prefLabels.addEventListener('change', () => { prefs.showLabels = prefLabels.checked; save(); });
+  prefTheme.addEventListener('change', () => {
+    prefs.theme = prefTheme.value;
+    applyTheme(prefs.theme);
+    save();
+  });
+  prefColumns.addEventListener('change', () => {
+    prefs.gridColumns = Number(prefColumns.value);
+    save();
+  });
 }
 
 init();
