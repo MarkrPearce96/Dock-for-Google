@@ -37,6 +37,8 @@ button {
 }
 button.secondary { background: #e8eaed; color: #202124; padding: 6px 10px; }
 .error { color: #c5221f; font-size: 13px; margin: 0; }
+.list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.list-header h2 { margin: 20px 0 8px; }
 .list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .row {
   display: flex;

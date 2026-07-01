@@ -167,6 +167,13 @@ form.addEventListener('submit', async (e) => {
   form.reset();
 });
 
+const restoreBtn = document.getElementById('restore-defaults');
+restoreBtn.addEventListener('click', async () => {
+  if (confirm('Replace your current app list with the default apps? This cannot be undone.')) {
+    await persist(SEED_APPS.map(makeApp));
+  }
+});
+
 async function init() {
   try {
     apps = await seedIfEmpty();
