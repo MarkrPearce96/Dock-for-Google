@@ -21,7 +21,7 @@ h1 { font-size: 22px; margin: 0 0 4px; }
   padding: 16px;
   display: flex;
   flex-direction: column;
-  min-height: 320px;
+  min-height: 420px;
 }
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
 .panel-head h2 { font-size: 15px; margin: 0; }
