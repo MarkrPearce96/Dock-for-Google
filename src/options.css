@@ -55,3 +55,14 @@ button.secondary { background: #e8eaed; color: #202124; padding: 6px 10px; }
 .row.editing .display { display: none; }
 .edit-fields { display: none; flex-direction: column; gap: 6px; flex: 1; }
 .row.editing .edit-fields { display: flex; }
+.drag-handle {
+  cursor: grab;
+  color: #9aa0a6;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+  padding: 0 2px;
+}
+.drag-handle:active { cursor: grabbing; }
+.row.dragging { opacity: 0.5; }
+.row.drag-over { box-shadow: inset 0 2px 0 #4f46e5; }

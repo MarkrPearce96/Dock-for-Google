@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { makeApp, addApp, updateApp, removeApp, moveApp } from '../src/lib/appList.js';
+import { makeApp, addApp, updateApp, removeApp, moveApp, moveAppTo } from '../src/lib/appList.js';
 
 test('makeApp generates id and trims fields', () => {
   const a = makeApp({ name: '  Gmail ', url: ' https://mail.google.com ' });
@@ -87,5 +87,46 @@ test('moveApp does not mutate the input list', () => {
   const list = addApp(addApp([], { name: 'A', url: 'https://a.com' }), { name: 'B', url: 'https://b.com' });
   const snapshot = JSON.stringify(list);
   moveApp(list, list[1].id, 'up');
+  assert.equal(JSON.stringify(list), snapshot);
+});
+
+test('moveAppTo moves an item from start to a middle index', () => {
+  let list = [];
+  for (const n of ['A', 'B', 'C', 'D']) list = addApp(list, { name: n, url: `https://${n.toLowerCase()}.com` });
+  const idA = list[0].id;
+  list = moveAppTo(list, idA, 2);
+  assert.deepEqual(list.map((a) => a.name), ['B', 'C', 'A', 'D']);
+});
+
+test('moveAppTo moves an item from end to start', () => {
+  let list = [];
+  for (const n of ['A', 'B', 'C']) list = addApp(list, { name: n, url: `https://${n.toLowerCase()}.com` });
+  const idC = list[2].id;
+  list = moveAppTo(list, idC, 0);
+  assert.deepEqual(list.map((a) => a.name), ['C', 'A', 'B']);
+});
+
+test('moveAppTo clamps an out-of-range index to the ends', () => {
+  let list = [];
+  for (const n of ['A', 'B', 'C']) list = addApp(list, { name: n, url: `https://${n.toLowerCase()}.com` });
+  const idA = list[0].id;
+  const high = moveAppTo(list, idA, 99);
+  assert.deepEqual(high.map((a) => a.name), ['B', 'C', 'A']);
+  const idC = list[2].id;
+  const low = moveAppTo(list, idC, -5);
+  assert.deepEqual(low.map((a) => a.name), ['C', 'A', 'B']);
+});
+
+test('moveAppTo returns the list unchanged when id is not found', () => {
+  const list = addApp([], { name: 'A', url: 'https://a.com' });
+  const same = moveAppTo(list, 'nonexistent', 0);
+  assert.deepEqual(same.map((a) => a.name), ['A']);
+});
+
+test('moveAppTo does not mutate the input list', () => {
+  let list = [];
+  for (const n of ['A', 'B', 'C']) list = addApp(list, { name: n, url: `https://${n.toLowerCase()}.com` });
+  const snapshot = JSON.stringify(list);
+  moveAppTo(list, list[0].id, 2);
   assert.equal(JSON.stringify(list), snapshot);
 });

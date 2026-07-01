@@ -41,3 +41,13 @@ export function moveApp(list, id, direction) {
   [next[i], next[j]] = [next[j], next[i]];
   return next;
 }
+
+export function moveAppTo(list, id, toIndex) {
+  const from = list.findIndex((app) => app.id === id);
+  if (from === -1) return list;
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  const clamped = Math.max(0, Math.min(toIndex, next.length));
+  next.splice(clamped, 0, item);
+  return next;
+}

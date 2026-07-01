@@ -1,5 +1,5 @@
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, updateApp, removeApp, moveApp, makeApp } from './lib/appList.js';
+import { addApp, updateApp, removeApp, moveApp, moveAppTo, makeApp } from './lib/appList.js';
 import { SEED_APPS } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 
@@ -11,6 +11,7 @@ const iconInput = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
 
 let apps = [];
+let draggedId = null;
 
 function isValidUrl(value) {
   try {
@@ -96,7 +97,42 @@ function makeRow(app, index) {
   const del = mkBtn('Delete', () => persist(removeApp(apps, app.id)), false);
   actions.append(up, down, editBtn, del);
 
-  li.append(img, meta, edit, actions);
+  // Drag-and-drop reordering (arrows remain as an accessible fallback)
+  const handle = document.createElement('span');
+  handle.className = 'drag-handle';
+  handle.textContent = '⠿';
+  handle.title = 'Drag to reorder';
+  handle.draggable = true;
+  handle.addEventListener('dragstart', (e) => {
+    draggedId = app.id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', app.id);
+    li.classList.add('dragging');
+  });
+  handle.addEventListener('dragend', () => {
+    draggedId = null;
+    li.classList.remove('dragging');
+    listEl.querySelectorAll('.row.drag-over').forEach((r) => r.classList.remove('drag-over'));
+  });
+
+  li.addEventListener('dragover', (e) => {
+    if (draggedId === null || draggedId === app.id) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    li.classList.add('drag-over');
+  });
+  li.addEventListener('dragleave', () => {
+    li.classList.remove('drag-over');
+  });
+  li.addEventListener('drop', (e) => {
+    e.preventDefault();
+    li.classList.remove('drag-over');
+    if (draggedId === null || draggedId === app.id) return;
+    const targetIndex = apps.findIndex((a) => a.id === app.id);
+    persist(moveAppTo(apps, draggedId, targetIndex));
+  });
+
+  li.append(handle, img, meta, edit, actions);
   return li;
 }
 
