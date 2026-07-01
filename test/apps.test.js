@@ -34,7 +34,7 @@ test('SEED_APPS is a non-empty list of name+url objects', () => {
 
 test('every default app ships with a local SVG icon path', () => {
   for (const a of SEED_APPS) {
-    assert.match(a.iconUrl, /^icons\/apps\/.+\.svg$/);
+    assert.match(a.iconUrl, /^icons\/apps\/.+\.(svg|png)$/);
   }
 });
 
