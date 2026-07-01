@@ -58,3 +58,4 @@ body {
   white-space: nowrap;
 }
 .empty { text-align: center; color: #5f6368; padding: 24px 8px; }
+body.no-labels .app span { display: none; }
