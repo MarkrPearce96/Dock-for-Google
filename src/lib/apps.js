@@ -6,7 +6,7 @@ export const SEED_APPS = [
   { name: 'Gmail', url: 'https://mail.google.com', iconUrl: 'icons/apps/gmail.svg' },
   { name: 'Photos', url: 'https://photos.google.com', iconUrl: 'icons/apps/photos.svg' },
   { name: 'Maps', url: 'https://maps.google.com', iconUrl: 'icons/apps/maps.svg' },
-  { name: 'Translate', url: 'https://translate.google.com' },
+  { name: 'Translate', url: 'https://translate.google.com', iconUrl: 'icons/apps/translate.svg' },
 ];
 
 export function filterApps(apps, query) {
