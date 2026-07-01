@@ -65,7 +65,10 @@ function makeAvailableTile(entry) {
   btn.type = 'button';
   btn.title = `Add ${entry.name}`;
   btn.append(makeIcon(entry), makeLabel(entry.name));
-  btn.addEventListener('click', () => persist(addApp(apps, entry)));
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    persist(addApp(apps, entry));
+  });
   return btn;
 }
 
