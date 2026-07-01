@@ -104,31 +104,18 @@ input[type=text], input[type=url] {
 .error { color: #c5221f; font-size: 13px; margin: 0; }
 .form-actions { display: flex; gap: 8px; }
 
-/* Pointer-drag sortable */
-.drag-clone {
-  position: fixed;
-  z-index: 1000;
-  margin: 0;
-  pointer-events: none;
-  opacity: 0.95;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-}
-.drag-source-hidden { display: none !important; }
-.tile.placeholder {
-  background: #eef0fd;
-  border: 2px dashed #c3c9f5;
-  border-radius: 10px;
-  cursor: default;
-  pointer-events: none;
-}
-body.dragging-active { cursor: grabbing; -webkit-user-select: none; user-select: none; }
+/* SortableJS drag states */
 .tile.mine { touch-action: none; }
+.sortable-ghost { opacity: 0.35; }
+.sortable-drag { opacity: 0.9; }
+.sortable-chosen { cursor: grabbing; }
 
-/* Available panel becomes a Remove drop zone while dragging a shortcut */
+/* Available panel becomes a Remove drop zone while dragging a shortcut.
+   Content is faded with opacity (not hidden) so the grid stays a valid
+   drop target under the overlay; the overlay itself ignores pointer events. */
 .panel.removing #available-grid,
 .panel.removing #search,
-.panel.removing .panel-head h2 { visibility: hidden; }
+.panel.removing .panel-head h2 { opacity: 0; }
 .panel.removing::after {
   content: "Drop here to remove";
   position: absolute;
@@ -140,6 +127,7 @@ body.dragging-active { cursor: grabbing; -webkit-user-select: none; user-select:
   border: 2px dashed #d0d0d0;
   font-size: 15px;
   color: #5f6368;
+  pointer-events: none;
 }
 .panel.removing.remove-hot { background: #fce8e6; }
 .panel.removing.remove-hot::after { border-color: #f28b82; color: #c5221f; }

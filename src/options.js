@@ -1,11 +1,12 @@
+import Sortable from './lib/Sortable.esm.js';
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, addAppAt, removeApp, moveAppTo, makeApp } from './lib/appList.js';
+import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
-import { createDragController } from './lib/sortable.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
+const availablePanel = availableGrid.closest('.panel');
 const myGrid = document.getElementById('my-grid');
 const myEmpty = document.getElementById('my-empty');
 const search = document.getElementById('search');
@@ -19,7 +20,6 @@ const addError = document.getElementById('add-error');
 const cancelBtn = document.getElementById('cancel-custom');
 
 let apps = [];
-let dragMoved = false;
 
 function isValidUrl(value) {
   try {
@@ -35,14 +35,6 @@ async function persist(next) {
   await saveApps(apps);
   render();
 }
-
-const drag = createDragController({
-  myGrid,
-  availablePanel: availableGrid.closest('.panel'),
-  onReorder: (id, index) => persist(moveAppTo(apps, id, index)),
-  onAddAt: (entry, index) => persist(addAppAt(apps, entry, index)),
-  onRemove: (id) => persist(removeApp(apps, id)),
-});
 
 function fallbackIcon(name) {
   return (
@@ -73,21 +65,16 @@ function makeAvailableTile(entry) {
   btn.className = 'tile';
   btn.type = 'button';
   btn.title = `Add ${entry.name}`;
+  btn.__entry = entry;
   btn.append(makeIcon(entry), makeLabel(entry.name));
-  btn.addEventListener('pointerdown', (e) => {
-    dragMoved = false;
-    drag.down(e, { kind: 'available', entry, tileEl: btn, onDragStart: () => { dragMoved = true; } });
-  });
-  btn.addEventListener('click', () => {
-    if (dragMoved) { dragMoved = false; return; }
-    persist(addApp(apps, entry));
-  });
+  btn.addEventListener('click', () => persist(addApp(apps, entry)));
   return btn;
 }
 
 function makeMyTile(app) {
   const tile = document.createElement('div');
   tile.className = 'tile mine';
+  tile.dataset.id = app.id;
 
   const remove = document.createElement('button');
   remove.className = 'remove';
@@ -97,12 +84,6 @@ function makeMyTile(app) {
   remove.addEventListener('click', () => persist(removeApp(apps, app.id)));
 
   tile.append(makeIcon(app), makeLabel(app.name), remove);
-
-  tile.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.remove')) return;
-    drag.down(e, { kind: 'mine', id: app.id, tileEl: tile });
-  });
-
   return tile;
 }
 
@@ -124,6 +105,60 @@ function render() {
       : 'No apps match your search.';
   }
 }
+
+// --- Drag-and-drop via SortableJS ---
+
+// Reorder within My shortcuts: rebuild `apps` from the new DOM order.
+function reorderFromDom() {
+  const ids = [...myGrid.querySelectorAll('.tile.mine')].map((t) => t.dataset.id);
+  const byId = new Map(apps.map((a) => [a.id, a]));
+  persist(ids.map((id) => byId.get(id)).filter(Boolean));
+}
+
+// A catalog app was dragged into My shortcuts: insert it at the drop position.
+function onAddToMy(evt) {
+  const entry = evt.item.__entry;
+  let index = 0;
+  for (const child of myGrid.children) {
+    if (child === evt.item) break;
+    if (child.classList.contains('mine')) index += 1;
+  }
+  evt.item.remove();
+  if (entry) persist(addAppAt(apps, entry, index));
+  else render();
+}
+
+// A shortcut was dropped onto the Available panel (Remove zone): delete it.
+function onDropToRemove(evt) {
+  const id = evt.item.dataset.id;
+  evt.item.remove();
+  if (id) persist(removeApp(apps, id));
+  else render();
+}
+
+new Sortable(myGrid, {
+  group: { name: 'apps', pull: true, put: true },
+  animation: 200,
+  draggable: '.tile.mine',
+  filter: '.remove',
+  preventOnFilter: false,
+  onStart: () => availablePanel.classList.add('removing'),
+  onEnd: () => availablePanel.classList.remove('removing', 'remove-hot'),
+  onMove: (evt) => {
+    availablePanel.classList.toggle('remove-hot', evt.to === availableGrid);
+    return true;
+  },
+  onUpdate: reorderFromDom,
+  onAdd: onAddToMy,
+});
+
+new Sortable(availableGrid, {
+  group: { name: 'apps', pull: true, put: true },
+  animation: 200,
+  sort: false,
+  draggable: '.tile',
+  onAdd: onDropToRemove,
+});
 
 search.addEventListener('input', render);
 
