@@ -5,11 +5,11 @@
 2. Run the converter:
    ```
    xcrun safari-web-extension-converter "src" --project-location "." \
-     --app-name "App Launcher" --bundle-identifier "com.mark.applauncher" \
+     --app-name "App Launcher" --bundle-identifier "com.mark.App-Launcher" \
      --macos-only --no-open --force
    ```
 3. Open `App Launcher/App Launcher.xcodeproj` in Xcode.
-4. Select the **App Launcher (macOS)** scheme and press **Run** (⌘R). A small
+4. Select the **App Launcher** scheme and press **Run** (⌘R). A small
    container app window appears — you can close it; the extension is now registered.
 
 ## Enable in Safari
@@ -32,5 +32,5 @@ Unsigned extensions turn off when Safari quits. To keep it enabled:
 3. Run once more. The extension now persists across restarts without the Develop-menu step.
 
 ## Updating the app list code later
-Edit files in `src/`, re-run the converter (step 2) with `--force`, rebuild in Xcode.
+Edit files in `src/`, re-run the converter (step 2) with `--force`, then rebuild with the **App Launcher** scheme in Xcode.
 The stored app list persists across rebuilds (it lives in Safari's extension storage).
