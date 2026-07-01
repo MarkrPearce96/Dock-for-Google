@@ -59,3 +59,33 @@ test('moveApp down at the end is a no-op', () => {
   list = moveApp(list, idB, 'down');
   assert.deepEqual(list.map((a) => a.name), ['A', 'B']);
 });
+
+test('moveApp up at the start is a no-op', () => {
+  let list = addApp(addApp([], { name: 'A', url: 'https://a.com' }), { name: 'B', url: 'https://b.com' });
+  const idA = list[0].id;
+  list = moveApp(list, idA, 'up');
+  assert.deepEqual(list.map((a) => a.name), ['A', 'B']);
+});
+
+test('updateApp does not mutate the input list', () => {
+  const list = addApp([], { name: 'Gmail', url: 'https://mail.google.com' });
+  const id = list[0].id;
+  const snapshot = JSON.stringify(list);
+  updateApp(list, id, { name: 'Mail' });
+  assert.equal(JSON.stringify(list), snapshot);
+});
+
+test('removeApp does not mutate the input list', () => {
+  const list = addApp([], { name: 'Gmail', url: 'https://mail.google.com' });
+  const id = list[0].id;
+  const snapshot = JSON.stringify(list);
+  removeApp(list, id);
+  assert.equal(JSON.stringify(list), snapshot);
+});
+
+test('moveApp does not mutate the input list', () => {
+  const list = addApp(addApp([], { name: 'A', url: 'https://a.com' }), { name: 'B', url: 'https://b.com' });
+  const snapshot = JSON.stringify(list);
+  moveApp(list, list[1].id, 'up');
+  assert.equal(JSON.stringify(list), snapshot);
+});

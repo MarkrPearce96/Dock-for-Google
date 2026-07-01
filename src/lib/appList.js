@@ -17,8 +17,8 @@ export function updateApp(list, id, patch) {
   return list.map((app) => {
     if (app.id !== id) return app;
     const next = { ...app };
-    if ('name' in patch) next.name = patch.name.trim();
-    if ('url' in patch) next.url = patch.url.trim();
+    if ('name' in patch) next.name = (patch.name ?? '').trim();
+    if ('url' in patch) next.url = (patch.url ?? '').trim();
     if ('iconUrl' in patch) {
       const icon = (patch.iconUrl ?? '').trim();
       if (icon) next.iconUrl = icon;
