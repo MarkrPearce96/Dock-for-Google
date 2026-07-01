@@ -99,7 +99,7 @@ export function createDragController(config) {
         t.style.transition = 'none';
         t.style.transform = `translate(${dx}px, ${dy}px)`;
         requestAnimationFrame(() => {
-          t.style.transition = 'transform 240ms ease';
+          t.style.transition = 'transform 800ms ease';
           t.style.transform = '';
         });
       }
