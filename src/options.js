@@ -121,8 +121,9 @@ function makeRow(app, index) {
     e.dataTransfer.dropEffect = 'move';
     li.classList.add('drag-over');
   });
-  li.addEventListener('dragleave', () => {
-    li.classList.remove('drag-over');
+  li.addEventListener('dragleave', (e) => {
+    // Ignore leave events fired when crossing onto a child element.
+    if (!li.contains(e.relatedTarget)) li.classList.remove('drag-over');
   });
   li.addEventListener('drop', (e) => {
     e.preventDefault();
