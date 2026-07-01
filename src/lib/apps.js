@@ -14,3 +14,20 @@ export function filterApps(apps, query) {
   if (q === '') return apps;
   return apps.filter((a) => a.name.toLowerCase().includes(q));
 }
+
+export function normalizeUrl(url) {
+  try {
+    const u = new URL(url);
+    // hostname (not host) — port is intentionally dropped for catalog matching.
+    let s = `${u.protocol}//${u.hostname}${u.pathname}`.toLowerCase();
+    if (s.endsWith('/')) s = s.slice(0, -1);
+    return s;
+  } catch {
+    return (url ?? '').trim();
+  }
+}
+
+export function catalogAvailable(catalog, myApps) {
+  const have = new Set(myApps.map((a) => normalizeUrl(a.url)));
+  return catalog.filter((entry) => !have.has(normalizeUrl(entry.url)));
+}

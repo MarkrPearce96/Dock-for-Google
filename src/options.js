@@ -1,14 +1,21 @@
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, updateApp, removeApp, moveApp, moveAppTo, makeApp } from './lib/appList.js';
-import { SEED_APPS } from './lib/apps.js';
+import { addApp, removeApp, moveAppTo, makeApp } from './lib/appList.js';
+import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 
-const listEl = document.getElementById('list');
-const form = document.getElementById('add-form');
+const availableGrid = document.getElementById('available-grid');
+const availableEmpty = document.getElementById('available-empty');
+const myGrid = document.getElementById('my-grid');
+const myEmpty = document.getElementById('my-empty');
+const search = document.getElementById('search');
+const createBtn = document.getElementById('create-custom');
+const restoreBtn = document.getElementById('restore-defaults');
+const form = document.getElementById('custom-form');
 const nameInput = document.getElementById('add-name');
 const urlInput = document.getElementById('add-url');
 const iconInput = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
+const cancelBtn = document.getElementById('cancel-custom');
 
 let apps = [];
 let draggedId = null;
@@ -32,124 +39,117 @@ function fallbackIcon(name) {
   return (
     'data:image/svg+xml,' +
     encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" rx="6" fill="#4f46e5"/><text x="14" y="19" font-size="14" fill="#fff" text-anchor="middle" font-family="sans-serif">${(name?.[0] || '?').toUpperCase()}</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" rx="8" fill="#4f46e5"/><text x="20" y="27" font-size="20" fill="#fff" text-anchor="middle" font-family="sans-serif">${(name?.[0] || '?').toUpperCase()}</text></svg>`
     )
   );
 }
 
-function makeRow(app, index) {
-  const li = document.createElement('li');
-  li.className = 'row';
-
+function makeIcon(app) {
   const img = document.createElement('img');
   img.src = resolveIcon(app);
   img.alt = '';
   img.addEventListener('error', () => { img.src = fallbackIcon(app.name); });
+  return img;
+}
 
-  const meta = document.createElement('div');
-  meta.className = 'meta display';
-  const name = document.createElement('div');
-  name.className = 'name';
-  name.textContent = app.name;
-  const url = document.createElement('div');
-  url.className = 'url';
-  url.textContent = app.url;
-  meta.append(name, url);
+function makeLabel(text) {
+  const span = document.createElement('span');
+  span.className = 'tile-label';
+  span.textContent = text;
+  return span;
+}
 
-  // Inline edit fields
-  const edit = document.createElement('div');
-  edit.className = 'edit-fields';
-  const eName = document.createElement('input');
-  eName.type = 'text';
-  eName.value = app.name;
-  const eUrl = document.createElement('input');
-  eUrl.type = 'url';
-  eUrl.value = app.url;
-  const eIcon = document.createElement('input');
-  eIcon.type = 'url';
-  eIcon.placeholder = 'Custom icon URL (optional)';
-  eIcon.value = app.iconUrl ?? '';
-  const eError = document.createElement('p');
-  eError.className = 'error';
-  eError.hidden = true;
-  const save = document.createElement('button');
-  save.textContent = 'Save';
-  save.addEventListener('click', async () => {
-    if (!isValidUrl(eUrl.value)) {
-      eError.textContent = 'Enter a valid http(s) URL.';
-      eError.hidden = false;
-      return;
-    }
-    await persist(updateApp(apps, app.id, {
-      name: eName.value,
-      url: eUrl.value,
-      iconUrl: eIcon.value,
-    }));
+function makeAvailableTile(entry) {
+  const btn = document.createElement('button');
+  btn.className = 'tile';
+  btn.type = 'button';
+  btn.title = `Add ${entry.name}`;
+  btn.append(makeIcon(entry), makeLabel(entry.name));
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    persist(addApp(apps, entry));
   });
-  edit.append(eName, eUrl, eIcon, eError, save);
+  return btn;
+}
 
-  // Action buttons
-  const actions = document.createElement('div');
-  actions.className = 'actions';
-  const up = mkBtn('↑', () => persist(moveApp(apps, app.id, 'up')), index === 0);
-  const down = mkBtn('↓', () => persist(moveApp(apps, app.id, 'down')), index === apps.length - 1);
-  const editBtn = mkBtn('Edit', () => li.classList.toggle('editing'), false);
-  const del = mkBtn('Delete', () => persist(removeApp(apps, app.id)), false);
-  actions.append(up, down, editBtn, del);
+function makeMyTile(app) {
+  const tile = document.createElement('div');
+  tile.className = 'tile mine';
+  tile.draggable = true;
 
-  // Drag-and-drop reordering (arrows remain as an accessible fallback)
-  const handle = document.createElement('span');
-  handle.className = 'drag-handle';
-  handle.textContent = '⠿';
-  handle.title = 'Drag to reorder';
-  handle.draggable = true;
-  handle.addEventListener('dragstart', (e) => {
+  const remove = document.createElement('button');
+  remove.className = 'remove';
+  remove.type = 'button';
+  remove.textContent = '×';
+  remove.title = `Remove ${app.name}`;
+  remove.addEventListener('click', () => persist(removeApp(apps, app.id)));
+
+  tile.append(makeIcon(app), makeLabel(app.name), remove);
+
+  tile.addEventListener('dragstart', (e) => {
     draggedId = app.id;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', app.id);
-    li.classList.add('dragging');
+    tile.classList.add('dragging');
   });
-  handle.addEventListener('dragend', () => {
+  tile.addEventListener('dragend', () => {
     draggedId = null;
-    li.classList.remove('dragging');
-    listEl.querySelectorAll('.row.drag-over').forEach((r) => r.classList.remove('drag-over'));
+    tile.classList.remove('dragging');
+    myGrid.querySelectorAll('.tile.drag-over').forEach((t) => t.classList.remove('drag-over'));
   });
-
-  li.addEventListener('dragover', (e) => {
+  tile.addEventListener('dragover', (e) => {
     if (draggedId === null || draggedId === app.id) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    li.classList.add('drag-over');
+    tile.classList.add('drag-over');
   });
-  li.addEventListener('dragleave', (e) => {
-    // Ignore leave events fired when crossing onto a child element.
-    if (!li.contains(e.relatedTarget)) li.classList.remove('drag-over');
+  tile.addEventListener('dragleave', (e) => {
+    if (!tile.contains(e.relatedTarget)) tile.classList.remove('drag-over');
   });
-  li.addEventListener('drop', (e) => {
+  tile.addEventListener('drop', (e) => {
     e.preventDefault();
-    li.classList.remove('drag-over');
+    tile.classList.remove('drag-over');
     if (draggedId === null || draggedId === app.id) return;
     const targetIndex = apps.findIndex((a) => a.id === app.id);
     persist(moveAppTo(apps, draggedId, targetIndex));
   });
 
-  li.append(handle, img, meta, edit, actions);
-  return li;
-}
-
-function mkBtn(label, onClick, disabled) {
-  const b = document.createElement('button');
-  b.className = 'secondary';
-  b.textContent = label;
-  b.disabled = disabled;
-  b.addEventListener('click', onClick);
-  return b;
+  return tile;
 }
 
 function render() {
-  listEl.textContent = '';
-  apps.forEach((app, i) => listEl.append(makeRow(app, i)));
+  // My shortcuts
+  myGrid.textContent = '';
+  apps.forEach((app) => myGrid.append(makeMyTile(app)));
+  myEmpty.hidden = apps.length !== 0;
+
+  // Available (catalog minus added, then search filter)
+  const allAvailable = catalogAvailable(SEED_APPS, apps);
+  const available = filterApps(allAvailable, search.value);
+  availableGrid.textContent = '';
+  available.forEach((entry) => availableGrid.append(makeAvailableTile(entry)));
+  if (available.length !== 0) {
+    availableEmpty.hidden = true;
+  } else {
+    availableEmpty.hidden = false;
+    availableEmpty.textContent = allAvailable.length === 0
+      ? 'All caught up — create a custom shortcut for anything else.'
+      : 'No apps match your search.';
+  }
 }
+
+search.addEventListener('input', render);
+
+createBtn.addEventListener('click', () => {
+  form.hidden = false;
+  nameInput.focus();
+});
+
+cancelBtn.addEventListener('click', () => {
+  form.hidden = true;
+  form.reset();
+  addError.hidden = true;
+});
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -165,11 +165,11 @@ form.addEventListener('submit', async (e) => {
     iconUrl: iconInput.value,
   }));
   form.reset();
+  form.hidden = true;
 });
 
-const restoreBtn = document.getElementById('restore-defaults');
 restoreBtn.addEventListener('click', async () => {
-  if (confirm('Replace your current app list with the default apps? This cannot be undone.')) {
+  if (confirm('Replace your shortcuts with the default apps? This cannot be undone.')) {
     await persist(SEED_APPS.map(makeApp));
   }
 });

@@ -8,21 +8,42 @@
 <body>
   <main>
     <h1>App Launcher</h1>
+    <p class="subtitle">Click an app in Available to add it. Hover a shortcut and click × to remove. Drag your shortcuts to reorder.</p>
 
-    <form id="add-form" class="card">
-      <h2>Add an app</h2>
+    <div class="panels">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Available</h2>
+          <input id="search" type="search" placeholder="Search" autocomplete="off" />
+        </div>
+        <div id="available-grid" class="grid"></div>
+        <p id="available-empty" class="empty" hidden></p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>My shortcuts</h2>
+        </div>
+        <div id="my-grid" class="grid"></div>
+        <p id="my-empty" class="empty" hidden>No shortcuts yet — add some from Available.</p>
+        <div class="panel-actions">
+          <button id="create-custom" type="button">Create custom shortcut</button>
+          <button id="restore-defaults" class="secondary" type="button">Restore defaults</button>
+        </div>
+      </section>
+    </div>
+
+    <form id="custom-form" class="card" hidden>
+      <h2>Create a custom shortcut</h2>
       <label>Name <input id="add-name" type="text" required /></label>
       <label>URL <input id="add-url" type="url" placeholder="https://example.com" required /></label>
       <label>Custom icon URL (optional) <input id="add-icon" type="url" placeholder="https://…/icon.png" /></label>
       <p id="add-error" class="error" hidden></p>
-      <button type="submit">Add app</button>
+      <div class="form-actions">
+        <button type="submit">Add shortcut</button>
+        <button id="cancel-custom" class="secondary" type="button">Cancel</button>
+      </div>
     </form>
-
-    <div class="list-header">
-      <h2>Your apps</h2>
-      <button id="restore-defaults" class="secondary" type="button">Restore default apps</button>
-    </div>
-    <ul id="list" class="list"></ul>
   </main>
   <script type="module" src="options.js"></script>
 </body>
