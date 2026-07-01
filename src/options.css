@@ -59,7 +59,7 @@ h1 { font-size: 22px; margin: 0 0 4px; }
   user-select: none;
 }
 .tile:hover { background: #f1f3f4; }
-.tile img { width: 40px; height: 40px; object-fit: contain; pointer-events: none; }
+.tile img { width: 40px; height: 40px; object-fit: contain; border-radius: 9px; pointer-events: none; }
 .tile-label {
   font-size: 12px; text-align: center; max-width: 100%;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

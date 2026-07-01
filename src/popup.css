@@ -48,7 +48,7 @@ body {
   color: inherit;
 }
 .app:hover { background: #f1f3f4; }
-.app img { width: 40px; height: 40px; object-fit: contain; }
+.app img { width: 40px; height: 40px; object-fit: contain; border-radius: 9px; }
 .app span {
   font-size: 13px;
   text-align: center;
