@@ -3,6 +3,7 @@ import { seedIfEmpty, saveApps } from './lib/storage.js';
 import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
+import { loadPrefs, setPref, DEFAULT_PREFS } from './lib/prefs.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
@@ -19,6 +20,10 @@ const urlInput = document.getElementById('add-url');
 const iconInput = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
 const cancelBtn = document.getElementById('cancel-custom');
+const prefNewTab = document.getElementById('pref-new-tab');
+const prefBackground = document.getElementById('pref-background');
+const prefSearch = document.getElementById('pref-search');
+const prefLabels = document.getElementById('pref-labels');
 
 let apps = [];
 
@@ -215,4 +220,32 @@ async function init() {
   render();
 }
 
+function syncBackgroundDisabled() {
+  prefBackground.disabled = !prefNewTab.checked;
+}
+
+async function initPrefs() {
+  let prefs;
+  try {
+    prefs = await loadPrefs();
+  } catch (e) {
+    console.error('App Launcher: prefs unavailable, using defaults', e);
+    prefs = DEFAULT_PREFS;
+  }
+  prefNewTab.checked = prefs.openInNewTab;
+  prefBackground.checked = prefs.openInBackground;
+  prefSearch.checked = prefs.showSearch;
+  prefLabels.checked = prefs.showLabels;
+  syncBackgroundDisabled();
+
+  prefNewTab.addEventListener('change', () => {
+    setPref('openInNewTab', prefNewTab.checked);
+    syncBackgroundDisabled();
+  });
+  prefBackground.addEventListener('change', () => setPref('openInBackground', prefBackground.checked));
+  prefSearch.addEventListener('change', () => setPref('showSearch', prefSearch.checked));
+  prefLabels.addEventListener('change', () => setPref('showLabels', prefLabels.checked));
+}
+
 init();
+initPrefs();
