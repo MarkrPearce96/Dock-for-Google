@@ -5,6 +5,8 @@ export const DEFAULT_PREFS = {
   openInBackground: false,
   showSearch: true,
   showLabels: true,
+  theme: 'system',
+  gridColumns: 3,
 };
 
 function defaultArea() {

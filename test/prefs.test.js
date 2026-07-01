@@ -26,7 +26,14 @@ test('loadPrefs merges a partial stored object over defaults', async () => {
 
 test('savePrefs then loadPrefs round-trips', async () => {
   const area = mockArea();
-  const next = { openInNewTab: false, openInBackground: true, showSearch: false, showLabels: false };
+  const next = {
+    openInNewTab: false,
+    openInBackground: true,
+    showSearch: false,
+    showLabels: false,
+    theme: 'dark',
+    gridColumns: 5,
+  };
   await savePrefs(next, area);
   assert.deepEqual(await loadPrefs(area), next);
   assert.deepEqual(area.store[PREFS_KEY], next);
