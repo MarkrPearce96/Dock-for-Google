@@ -6,7 +6,7 @@
    ```
    cd "/Users/mark/Documents/Chrome Extension"
    ```
-2. Regenerate icons if needed: `node tools/make-icons.mjs` (only needed if the icon PNGs are missing or you changed the generator; the committed repo already includes the generated icons, so first-time users can skip this).
+2. (No action needed) The toolbar/app icons are committed PNGs in `src/icons/`, rendered from the source `src/icons/app-icon-source.svg`. To change them, replace that SVG and re-render the four `icon-*.png` sizes (48/128/256/512).
 3. Run the converter:
    ```
    xcrun safari-web-extension-converter "src" --project-location "." \
