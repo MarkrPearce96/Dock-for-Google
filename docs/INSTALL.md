@@ -1,15 +1,20 @@
 # Installing App Launcher in Safari
 
 ## One-time build
-1. Regenerate icons if needed: `node tools/make-icons.mjs` (only needed if the icon PNGs are missing or you changed the generator; the committed repo already includes the generated icons, so first-time users can skip this).
-2. Run the converter:
+1. Open Terminal and move into the project folder first (every command below is
+   relative to it — running them from elsewhere gives "Could not find extension at src"):
+   ```
+   cd "/Users/mark/Documents/Chrome Extension"
+   ```
+2. Regenerate icons if needed: `node tools/make-icons.mjs` (only needed if the icon PNGs are missing or you changed the generator; the committed repo already includes the generated icons, so first-time users can skip this).
+3. Run the converter:
    ```
    xcrun safari-web-extension-converter "src" --project-location "." \
      --app-name "App Launcher" --bundle-identifier "com.mark.App-Launcher" \
      --macos-only --no-open --force
    ```
-3. Open `App Launcher/App Launcher.xcodeproj` in Xcode.
-4. Select the **App Launcher** scheme and press **Run** (⌘R). A small
+4. Open `App Launcher/App Launcher.xcodeproj` in Xcode.
+5. Select the **App Launcher** scheme and press **Run** (⌘R). A small
    container app window appears — you can close it; the extension is now registered.
 
 ## Enable in Safari
