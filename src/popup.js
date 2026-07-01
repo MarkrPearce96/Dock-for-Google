@@ -3,6 +3,7 @@ import { filterApps, SEED_APPS } from './lib/apps.js';
 import { makeApp } from './lib/appList.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, DEFAULT_PREFS } from './lib/prefs.js';
+import { applyTheme } from './lib/theme.js';
 
 const grid = document.getElementById('grid');
 const emptyMsg = document.getElementById('empty');
@@ -11,6 +12,12 @@ const settingsBtn = document.getElementById('open-settings');
 
 let allApps = [];
 let prefs = { ...DEFAULT_PREFS };
+
+function applyColumns(n) {
+  const cols = [3, 4, 5].includes(n) ? n : 3;
+  document.documentElement.style.setProperty('--cols', cols);
+  document.body.style.width = `${40 + cols * 100}px`;
+}
 
 function openApp(url) {
   if (prefs.openInNewTab) {
@@ -71,6 +78,8 @@ async function init() {
     console.error('App Launcher: prefs unavailable, using defaults', e);
     prefs = { ...DEFAULT_PREFS };
   }
+  applyTheme(prefs.theme);
+  applyColumns(prefs.gridColumns);
   if (!prefs.showSearch) search.style.display = 'none';
   document.body.classList.toggle('no-labels', !prefs.showLabels);
 
