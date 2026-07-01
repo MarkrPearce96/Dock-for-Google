@@ -1,5 +1,6 @@
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, updateApp, removeApp, moveApp } from './lib/appList.js';
+import { addApp, updateApp, removeApp, moveApp, makeApp } from './lib/appList.js';
+import { SEED_APPS } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 
 const listEl = document.getElementById('list');
@@ -30,7 +31,7 @@ function fallbackIcon(name) {
   return (
     'data:image/svg+xml,' +
     encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" rx="6" fill="#4f46e5"/><text x="14" y="19" font-size="14" fill="#fff" text-anchor="middle" font-family="sans-serif">${(name[0] || '?').toUpperCase()}</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" rx="6" fill="#4f46e5"/><text x="14" y="19" font-size="14" fill="#fff" text-anchor="middle" font-family="sans-serif">${(name?.[0] || '?').toUpperCase()}</text></svg>`
     )
   );
 }
@@ -130,7 +131,12 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function init() {
-  apps = await seedIfEmpty();
+  try {
+    apps = await seedIfEmpty();
+  } catch (e) {
+    console.error('App Launcher: storage unavailable, using in-memory defaults', e);
+    apps = SEED_APPS.map(makeApp);
+  }
   render();
 }
 
