@@ -32,9 +32,9 @@ test('SEED_APPS is a non-empty list of name+url objects', () => {
   }
 });
 
-test('Docs, Sheets, and Slides ship with bundled SVG icon paths', () => {
+test('bundled-icon apps ship with local SVG icon paths', () => {
   const byName = Object.fromEntries(SEED_APPS.map((a) => [a.name, a]));
-  for (const name of ['Docs', 'Sheets', 'Slides']) {
+  for (const name of ['Docs', 'Sheets', 'Slides', 'Drive', 'Gmail', 'Photos', 'Maps']) {
     assert.match(byName[name].iconUrl, /^icons\/apps\/.+\.svg$/);
   }
 });
