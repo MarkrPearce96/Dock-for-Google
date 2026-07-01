@@ -1,7 +1,8 @@
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, removeApp, moveAppTo, makeApp } from './lib/appList.js';
+import { addApp, addAppAt, removeApp, moveAppTo, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
+import { createDragController } from './sortable.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
@@ -18,7 +19,7 @@ const addError = document.getElementById('add-error');
 const cancelBtn = document.getElementById('cancel-custom');
 
 let apps = [];
-let draggedId = null;
+let dragMoved = false;
 
 function isValidUrl(value) {
   try {
@@ -34,6 +35,14 @@ async function persist(next) {
   await saveApps(apps);
   render();
 }
+
+const drag = createDragController({
+  myGrid,
+  availablePanel: availableGrid.closest('.panel'),
+  onReorder: (id, index) => persist(moveAppTo(apps, id, index)),
+  onAddAt: (entry, index) => persist(addAppAt(apps, entry, index)),
+  onRemove: (id) => persist(removeApp(apps, id)),
+});
 
 function fallbackIcon(name) {
   return (
@@ -65,8 +74,12 @@ function makeAvailableTile(entry) {
   btn.type = 'button';
   btn.title = `Add ${entry.name}`;
   btn.append(makeIcon(entry), makeLabel(entry.name));
+  btn.addEventListener('pointerdown', (e) => {
+    dragMoved = false;
+    drag.down(e, { kind: 'available', entry, tileEl: btn, onDragStart: () => { dragMoved = true; } });
+  });
   btn.addEventListener('click', () => {
-    btn.disabled = true;
+    if (dragMoved) { dragMoved = false; return; }
     persist(addApp(apps, entry));
   });
   return btn;
@@ -75,7 +88,6 @@ function makeAvailableTile(entry) {
 function makeMyTile(app) {
   const tile = document.createElement('div');
   tile.className = 'tile mine';
-  tile.draggable = true;
 
   const remove = document.createElement('button');
   remove.className = 'remove';
@@ -86,44 +98,19 @@ function makeMyTile(app) {
 
   tile.append(makeIcon(app), makeLabel(app.name), remove);
 
-  tile.addEventListener('dragstart', (e) => {
-    draggedId = app.id;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', app.id);
-    tile.classList.add('dragging');
-  });
-  tile.addEventListener('dragend', () => {
-    draggedId = null;
-    tile.classList.remove('dragging');
-    myGrid.querySelectorAll('.tile.drag-over').forEach((t) => t.classList.remove('drag-over'));
-  });
-  tile.addEventListener('dragover', (e) => {
-    if (draggedId === null || draggedId === app.id) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    tile.classList.add('drag-over');
-  });
-  tile.addEventListener('dragleave', (e) => {
-    if (!tile.contains(e.relatedTarget)) tile.classList.remove('drag-over');
-  });
-  tile.addEventListener('drop', (e) => {
-    e.preventDefault();
-    tile.classList.remove('drag-over');
-    if (draggedId === null || draggedId === app.id) return;
-    const targetIndex = apps.findIndex((a) => a.id === app.id);
-    persist(moveAppTo(apps, draggedId, targetIndex));
+  tile.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.remove')) return;
+    drag.down(e, { kind: 'mine', id: app.id, tileEl: tile });
   });
 
   return tile;
 }
 
 function render() {
-  // My shortcuts
   myGrid.textContent = '';
   apps.forEach((app) => myGrid.append(makeMyTile(app)));
   myEmpty.hidden = apps.length !== 0;
 
-  // Available (catalog minus added, then search filter)
   const allAvailable = catalogAvailable(SEED_APPS, apps);
   const available = filterApps(allAvailable, search.value);
   availableGrid.textContent = '';
