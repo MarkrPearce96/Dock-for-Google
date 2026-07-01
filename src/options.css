@@ -6,65 +6,97 @@ body {
   margin: 0;
   padding: 24px;
 }
-main { max-width: 640px; margin: 0 auto; }
-h1 { font-size: 22px; }
-h2 { font-size: 16px; margin: 20px 0 8px; }
-.card {
+main { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+.subtitle { color: #5f6368; font-size: 13px; margin: 0 0 20px; }
+
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
+
+.panel {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  min-height: 320px;
 }
-label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
-input {
-  font-size: 14px;
-  padding: 8px;
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.panel-head h2 { font-size: 15px; margin: 0; }
+#search {
+  flex: 1;
+  max-width: 170px;
+  font-size: 13px;
+  padding: 6px 10px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 999px;
 }
-button {
-  align-self: flex-start;
-  font-size: 14px;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  background: #4f46e5;
-  color: #fff;
-  cursor: pointer;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex: 1;
+  align-content: start;
 }
-button.secondary { background: #e8eaed; color: #202124; padding: 6px 10px; }
-.error { color: #c5221f; font-size: 13px; margin: 0; }
-.list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.list-header h2 { margin: 20px 0 8px; }
-.list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.row {
+.tile {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  gap: 6px;
+  padding: 12px 4px;
+  border: none;
+  background: none;
   border-radius: 10px;
-  padding: 8px 12px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
 }
-.row img { width: 28px; height: 28px; object-fit: contain; }
-.row .meta { flex: 1; min-width: 0; }
-.row .meta .name { font-weight: 600; }
-.row .meta .url { font-size: 12px; color: #5f6368; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row .actions { display: flex; gap: 4px; }
-.row.editing .display { display: none; }
-.edit-fields { display: none; flex-direction: column; gap: 6px; flex: 1; }
-.row.editing .edit-fields { display: flex; }
-.drag-handle {
-  cursor: grab;
-  color: #9aa0a6;
-  font-size: 18px;
-  line-height: 1;
-  user-select: none;
-  padding: 0 2px;
+.tile:hover { background: #f1f3f4; }
+.tile img { width: 40px; height: 40px; object-fit: contain; pointer-events: none; }
+.tile-label {
+  font-size: 12px; text-align: center; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.drag-handle:active { cursor: grabbing; }
-.row.dragging { opacity: 0.5; }
-.row.drag-over { box-shadow: inset 0 2px 0 #4f46e5; }
+
+.tile.mine { cursor: grab; }
+.tile.mine:active { cursor: grabbing; }
+.tile.dragging { opacity: 0.5; }
+.tile.drag-over { box-shadow: inset 0 0 0 2px #4f46e5; }
+.tile .remove {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 18px; height: 18px;
+  padding: 0;
+  border: none; border-radius: 50%;
+  background: #e8eaed; color: #5f6368;
+  font-size: 12px; line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  display: none;
+}
+.tile.mine:hover .remove { display: block; }
+
+.empty { color: #5f6368; font-size: 13px; text-align: center; padding: 24px 8px; margin: auto 0; }
+
+.panel-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+button {
+  font-size: 14px; padding: 8px 14px; border: none; border-radius: 8px;
+  background: #4f46e5; color: #fff; cursor: pointer;
+}
+button.secondary { background: #e8eaed; color: #202124; }
+
+.card {
+  background: #fff; border: 1px solid #e0e0e0; border-radius: 12px;
+  padding: 16px; margin-top: 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.card h2 { font-size: 15px; margin: 0; }
+label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+input[type=text], input[type=url] {
+  font-size: 14px; padding: 8px; border: 1px solid #ccc; border-radius: 8px;
+}
+.error { color: #c5221f; font-size: 13px; margin: 0; }
+.form-actions { display: flex; gap: 8px; }
