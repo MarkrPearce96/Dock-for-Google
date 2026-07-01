@@ -33,17 +33,19 @@
       </section>
     </div>
 
-    <form id="custom-form" class="card" hidden>
-      <h2>Create a custom shortcut</h2>
-      <label>Name <input id="add-name" type="text" required /></label>
-      <label>URL <input id="add-url" type="url" placeholder="https://example.com" required /></label>
-      <label>Custom icon URL (optional) <input id="add-icon" type="url" placeholder="https://…/icon.png" /></label>
-      <p id="add-error" class="error" hidden></p>
-      <div class="form-actions">
-        <button type="submit">Add shortcut</button>
-        <button id="cancel-custom" class="secondary" type="button">Cancel</button>
-      </div>
-    </form>
+    <dialog id="custom-dialog" class="modal">
+      <form id="custom-form">
+        <h2>Create custom shortcut</h2>
+        <label>Shortcut name <input id="add-name" type="text" required /></label>
+        <label>URL <input id="add-url" type="url" placeholder="https://example.com" required /></label>
+        <label>Custom icon URL (optional) <input id="add-icon" type="url" placeholder="https://…/icon.png" /></label>
+        <p id="add-error" class="error" hidden></p>
+        <div class="form-actions">
+          <button id="cancel-custom" class="secondary" type="button">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
   </main>
   <script type="module" src="options.js"></script>
 </body>

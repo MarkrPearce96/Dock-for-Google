@@ -104,6 +104,21 @@ input[type=text], input[type=url] {
 .error { color: #c5221f; font-size: 13px; margin: 0; }
 .form-actions { display: flex; gap: 8px; }
 
+/* Create-custom-shortcut modal */
+.modal {
+  border: none;
+  border-radius: 14px;
+  padding: 0;
+  width: min(420px, calc(100vw - 40px));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  background: #fff;
+  color: #202124;
+}
+.modal::backdrop { background: rgba(0, 0, 0, 0.4); }
+.modal form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal h2 { margin: 0 0 4px; font-size: 17px; }
+.modal .form-actions { justify-content: flex-end; margin-top: 4px; }
+
 /* SortableJS drag states */
 .tile.mine { touch-action: none; }
 .sortable-ghost { opacity: 0.35; }

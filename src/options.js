@@ -12,6 +12,7 @@ const myEmpty = document.getElementById('my-empty');
 const search = document.getElementById('search');
 const createBtn = document.getElementById('create-custom');
 const restoreBtn = document.getElementById('restore-defaults');
+const dialog = document.getElementById('custom-dialog');
 const form = document.getElementById('custom-form');
 const nameInput = document.getElementById('add-name');
 const urlInput = document.getElementById('add-url');
@@ -171,12 +172,13 @@ new Sortable(availableGrid, {
 search.addEventListener('input', render);
 
 createBtn.addEventListener('click', () => {
-  form.hidden = false;
+  dialog.showModal();
   nameInput.focus();
 });
 
-cancelBtn.addEventListener('click', () => {
-  form.hidden = true;
+cancelBtn.addEventListener('click', () => dialog.close());
+
+dialog.addEventListener('close', () => {
   form.reset();
   addError.hidden = true;
 });
@@ -194,8 +196,7 @@ form.addEventListener('submit', async (e) => {
     url: urlInput.value,
     iconUrl: iconInput.value,
   }));
-  form.reset();
-  form.hidden = true;
+  dialog.close();
 });
 
 restoreBtn.addEventListener('click', async () => {
