@@ -3,7 +3,7 @@ import { seedIfEmpty, saveApps } from './lib/storage.js';
 import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
-import { loadPrefs, setPref, DEFAULT_PREFS } from './lib/prefs.js';
+import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
@@ -230,7 +230,7 @@ async function initPrefs() {
     prefs = await loadPrefs();
   } catch (e) {
     console.error('App Launcher: prefs unavailable, using defaults', e);
-    prefs = DEFAULT_PREFS;
+    prefs = { ...DEFAULT_PREFS };
   }
   prefNewTab.checked = prefs.openInNewTab;
   prefBackground.checked = prefs.openInBackground;
@@ -238,13 +238,18 @@ async function initPrefs() {
   prefLabels.checked = prefs.showLabels;
   syncBackgroundDisabled();
 
+  function save() {
+    savePrefs(prefs).catch((e) => console.error('App Launcher: failed to save pref', e));
+  }
+
   prefNewTab.addEventListener('change', () => {
-    setPref('openInNewTab', prefNewTab.checked);
+    prefs.openInNewTab = prefNewTab.checked;
     syncBackgroundDisabled();
+    save();
   });
-  prefBackground.addEventListener('change', () => setPref('openInBackground', prefBackground.checked));
-  prefSearch.addEventListener('change', () => setPref('showSearch', prefSearch.checked));
-  prefLabels.addEventListener('change', () => setPref('showLabels', prefLabels.checked));
+  prefBackground.addEventListener('change', () => { prefs.openInBackground = prefBackground.checked; save(); });
+  prefSearch.addEventListener('change', () => { prefs.showSearch = prefSearch.checked; save(); });
+  prefLabels.addEventListener('change', () => { prefs.showLabels = prefLabels.checked; save(); });
 }
 
 init();

@@ -10,7 +10,7 @@ const search = document.getElementById('search');
 const settingsBtn = document.getElementById('open-settings');
 
 let allApps = [];
-let prefs = DEFAULT_PREFS;
+let prefs = { ...DEFAULT_PREFS };
 
 function openApp(url) {
   if (prefs.openInNewTab) {
@@ -69,7 +69,7 @@ async function init() {
     prefs = await loadPrefs();
   } catch (e) {
     console.error('App Launcher: prefs unavailable, using defaults', e);
-    prefs = DEFAULT_PREFS;
+    prefs = { ...DEFAULT_PREFS };
   }
   if (!prefs.showSearch) search.style.display = 'none';
   document.body.classList.toggle('no-labels', !prefs.showLabels);
