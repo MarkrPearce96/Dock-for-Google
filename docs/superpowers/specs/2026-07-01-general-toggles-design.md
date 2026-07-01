@@ -17,7 +17,7 @@ popup when it opens.
 - Four toggles in a "General" card below the panels:
   - **Open in new tab** (default `true`) — off navigates the current tab.
   - **Open in background** (default `false`) — new tab opens without switching to it.
-  - **Show search box** (default `true`) — hides the popup's search bar when off.
+  - **Show search box** (default `true`) — hides the popup's search input when off (the gear/settings button stays).
   - **Show app labels** (default `true`) — hides the names under popup icons when off.
 - Toggling saves immediately (no Save button).
 - The popup reads and applies the prefs on open.
@@ -60,7 +60,7 @@ their default (forward-compatible when new prefs are added later).
 - **`src/options.js`** — on load, `loadPrefs()` and set each checkbox's `checked`; disable `#pref-background` when `#pref-new-tab` is unchecked. On `change`, `setPref(...)` and re-apply the disabled state.
 - **`src/popup.js`** — on load, `loadPrefs()` and apply:
   - Click handler: `openInNewTab ? browser.tabs.create({ url, active: !openInBackground }) : browser.tabs.update({ url })`.
-  - `showSearch === false` → hide the search bar (`#search`'s container).
+  - `showSearch === false` → hide **only** the `#search` input (the gear/settings button stays visible so settings are always reachable).
   - `showLabels === false` → add a `no-labels` class to the grid/body.
 - **`src/popup.css`** — `.no-labels .app span { display: none; }` (and any spacing tweak); hidden-search handled via an attribute/class.
 
