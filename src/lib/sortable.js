@@ -1,4 +1,4 @@
-import { insertionIndex } from './lib/grid.js';
+import { insertionIndex } from './grid.js';
 
 const DRAG_THRESHOLD = 5;
 

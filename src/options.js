@@ -2,7 +2,7 @@ import { seedIfEmpty, saveApps } from './lib/storage.js';
 import { addApp, addAppAt, removeApp, moveAppTo, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
-import { createDragController } from './sortable.js';
+import { createDragController } from './lib/sortable.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
