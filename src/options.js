@@ -1,24 +1,34 @@
+import Sortable from './lib/Sortable.esm.js';
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { addApp, removeApp, moveAppTo, makeApp } from './lib/appList.js';
+import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
 import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
+import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
+import { applyTheme } from './lib/theme.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
+const availablePanel = availableGrid.closest('.panel');
 const myGrid = document.getElementById('my-grid');
 const myEmpty = document.getElementById('my-empty');
 const search = document.getElementById('search');
 const createBtn = document.getElementById('create-custom');
 const restoreBtn = document.getElementById('restore-defaults');
+const dialog = document.getElementById('custom-dialog');
 const form = document.getElementById('custom-form');
 const nameInput = document.getElementById('add-name');
 const urlInput = document.getElementById('add-url');
 const iconInput = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
 const cancelBtn = document.getElementById('cancel-custom');
+const prefNewTab = document.getElementById('pref-new-tab');
+const prefBackground = document.getElementById('pref-background');
+const prefSearch = document.getElementById('pref-search');
+const prefLabels = document.getElementById('pref-labels');
+const prefTheme = document.getElementById('pref-theme');
+const prefColumns = document.getElementById('pref-columns');
 
 let apps = [];
-let draggedId = null;
 
 function isValidUrl(value) {
   try {
@@ -64,18 +74,16 @@ function makeAvailableTile(entry) {
   btn.className = 'tile';
   btn.type = 'button';
   btn.title = `Add ${entry.name}`;
+  btn.__entry = entry;
   btn.append(makeIcon(entry), makeLabel(entry.name));
-  btn.addEventListener('click', () => {
-    btn.disabled = true;
-    persist(addApp(apps, entry));
-  });
+  btn.addEventListener('click', () => persist(addApp(apps, entry)));
   return btn;
 }
 
 function makeMyTile(app) {
   const tile = document.createElement('div');
   tile.className = 'tile mine';
-  tile.draggable = true;
+  tile.dataset.id = app.id;
 
   const remove = document.createElement('button');
   remove.className = 'remove';
@@ -85,45 +93,14 @@ function makeMyTile(app) {
   remove.addEventListener('click', () => persist(removeApp(apps, app.id)));
 
   tile.append(makeIcon(app), makeLabel(app.name), remove);
-
-  tile.addEventListener('dragstart', (e) => {
-    draggedId = app.id;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', app.id);
-    tile.classList.add('dragging');
-  });
-  tile.addEventListener('dragend', () => {
-    draggedId = null;
-    tile.classList.remove('dragging');
-    myGrid.querySelectorAll('.tile.drag-over').forEach((t) => t.classList.remove('drag-over'));
-  });
-  tile.addEventListener('dragover', (e) => {
-    if (draggedId === null || draggedId === app.id) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    tile.classList.add('drag-over');
-  });
-  tile.addEventListener('dragleave', (e) => {
-    if (!tile.contains(e.relatedTarget)) tile.classList.remove('drag-over');
-  });
-  tile.addEventListener('drop', (e) => {
-    e.preventDefault();
-    tile.classList.remove('drag-over');
-    if (draggedId === null || draggedId === app.id) return;
-    const targetIndex = apps.findIndex((a) => a.id === app.id);
-    persist(moveAppTo(apps, draggedId, targetIndex));
-  });
-
   return tile;
 }
 
 function render() {
-  // My shortcuts
   myGrid.textContent = '';
   apps.forEach((app) => myGrid.append(makeMyTile(app)));
   myEmpty.hidden = apps.length !== 0;
 
-  // Available (catalog minus added, then search filter)
   const allAvailable = catalogAvailable(SEED_APPS, apps);
   const available = filterApps(allAvailable, search.value);
   availableGrid.textContent = '';
@@ -138,15 +115,78 @@ function render() {
   }
 }
 
+// --- Drag-and-drop via SortableJS ---
+
+// Reorder within My shortcuts: rebuild `apps` from the new DOM order.
+function reorderFromDom() {
+  const ids = [...myGrid.querySelectorAll('.tile.mine')].map((t) => t.dataset.id);
+  const byId = new Map(apps.map((a) => [a.id, a]));
+  persist(ids.map((id) => byId.get(id)).filter(Boolean));
+}
+
+// A catalog app was dragged into My shortcuts: insert it at the drop position.
+function onAddToMy(evt) {
+  const entry = evt.item.__entry;
+  let index = 0;
+  for (const child of myGrid.children) {
+    if (child === evt.item) break;
+    if (child.classList.contains('mine')) index += 1;
+  }
+  evt.item.remove();
+  if (entry) persist(addAppAt(apps, entry, index));
+  else render();
+}
+
+// A shortcut was dropped onto the Available panel (Remove zone): delete it.
+function onDropToRemove(evt) {
+  const id = evt.item.dataset.id;
+  evt.item.remove();
+  if (id) persist(removeApp(apps, id));
+  else render();
+}
+
+new Sortable(myGrid, {
+  group: { name: 'apps', pull: true, put: true },
+  animation: 200,
+  draggable: '.tile.mine',
+  filter: '.remove',
+  preventOnFilter: false,
+  onStart: () => {
+    document.body.classList.add('sorting');
+    availablePanel.classList.add('removing');
+  },
+  onEnd: () => {
+    document.body.classList.remove('sorting');
+    availablePanel.classList.remove('removing', 'remove-hot');
+  },
+  onMove: (evt) => {
+    availablePanel.classList.toggle('remove-hot', evt.to === availableGrid);
+    return true;
+  },
+  onUpdate: reorderFromDom,
+  onAdd: onAddToMy,
+});
+
+new Sortable(availableGrid, {
+  group: { name: 'apps', pull: true, put: true },
+  animation: 200,
+  sort: false,
+  draggable: '.tile',
+  onStart: () => document.body.classList.add('sorting'),
+  onEnd: () => document.body.classList.remove('sorting'),
+  onAdd: onDropToRemove,
+});
+
 search.addEventListener('input', render);
 
 createBtn.addEventListener('click', () => {
-  form.hidden = false;
+  dialog.showModal();
   nameInput.focus();
 });
 
-cancelBtn.addEventListener('click', () => {
-  form.hidden = true;
+cancelBtn.addEventListener('click', () => dialog.close());
+
+dialog.addEventListener('close', () => {
   form.reset();
   addError.hidden = true;
 });
@@ -164,8 +204,7 @@ form.addEventListener('submit', async (e) => {
     url: urlInput.value,
     iconUrl: iconInput.value,
   }));
-  form.reset();
-  form.hidden = true;
+  dialog.close();
 });
 
 restoreBtn.addEventListener('click', async () => {
@@ -184,4 +223,49 @@ async function init() {
   render();
 }
 
+function syncBackgroundDisabled() {
+  prefBackground.disabled = !prefNewTab.checked;
+}
+
+async function initPrefs() {
+  let prefs;
+  try {
+    prefs = await loadPrefs();
+  } catch (e) {
+    console.error('App Launcher: prefs unavailable, using defaults', e);
+    prefs = { ...DEFAULT_PREFS };
+  }
+  prefNewTab.checked = prefs.openInNewTab;
+  prefBackground.checked = prefs.openInBackground;
+  prefSearch.checked = prefs.showSearch;
+  prefLabels.checked = prefs.showLabels;
+  syncBackgroundDisabled();
+  applyTheme(prefs.theme);
+  prefTheme.value = prefs.theme;
+  prefColumns.value = String(prefs.gridColumns);
+
+  function save() {
+    savePrefs(prefs).catch((e) => console.error('App Launcher: failed to save pref', e));
+  }
+
+  prefNewTab.addEventListener('change', () => {
+    prefs.openInNewTab = prefNewTab.checked;
+    syncBackgroundDisabled();
+    save();
+  });
+  prefBackground.addEventListener('change', () => { prefs.openInBackground = prefBackground.checked; save(); });
+  prefSearch.addEventListener('change', () => { prefs.showSearch = prefSearch.checked; save(); });
+  prefLabels.addEventListener('change', () => { prefs.showLabels = prefLabels.checked; save(); });
+  prefTheme.addEventListener('change', () => {
+    prefs.theme = prefTheme.value;
+    applyTheme(prefs.theme);
+    save();
+  });
+  prefColumns.addEventListener('change', () => {
+    prefs.gridColumns = Number(prefColumns.value);
+    save();
+  });
+}
+
 init();
+initPrefs();

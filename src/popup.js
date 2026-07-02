@@ -2,6 +2,8 @@ import { seedIfEmpty } from './lib/storage.js';
 import { filterApps, SEED_APPS } from './lib/apps.js';
 import { makeApp } from './lib/appList.js';
 import { resolveIcon } from './lib/icons.js';
+import { loadPrefs, DEFAULT_PREFS } from './lib/prefs.js';
+import { applyTheme } from './lib/theme.js';
 
 const grid = document.getElementById('grid');
 const emptyMsg = document.getElementById('empty');
@@ -9,6 +11,22 @@ const search = document.getElementById('search');
 const settingsBtn = document.getElementById('open-settings');
 
 let allApps = [];
+let prefs = { ...DEFAULT_PREFS };
+
+function applyColumns(n) {
+  const cols = [3, 4, 5].includes(n) ? n : 3;
+  document.documentElement.style.setProperty('--cols', cols);
+  document.body.style.width = `${40 + cols * 100}px`;
+}
+
+function openApp(url) {
+  if (prefs.openInNewTab) {
+    browser.tabs.create({ url, active: !prefs.openInBackground });
+  } else {
+    browser.tabs.update({ url });
+  }
+  window.close();
+}
 
 function render(apps) {
   grid.textContent = '';
@@ -24,10 +42,7 @@ function render(apps) {
   for (const app of apps) {
     const button = document.createElement('button');
     button.className = 'app';
-    button.addEventListener('click', () => {
-      browser.tabs.create({ url: app.url });
-      window.close();
-    });
+    button.addEventListener('click', () => openApp(app.url));
 
     const img = document.createElement('img');
     img.src = resolveIcon(app);
@@ -57,6 +72,17 @@ settingsBtn.addEventListener('click', () => {
 });
 
 async function init() {
+  try {
+    prefs = await loadPrefs();
+  } catch (e) {
+    console.error('App Launcher: prefs unavailable, using defaults', e);
+    prefs = { ...DEFAULT_PREFS };
+  }
+  applyTheme(prefs.theme);
+  applyColumns(prefs.gridColumns);
+  if (!prefs.showSearch) search.style.display = 'none';
+  document.body.classList.toggle('no-labels', !prefs.showLabels);
+
   try {
     allApps = await seedIfEmpty();
   } catch (e) {

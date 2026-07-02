@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { makeApp, addApp, updateApp, removeApp, moveApp, moveAppTo } from '../src/lib/appList.js';
+import { makeApp, addApp, updateApp, removeApp, moveApp, moveAppTo, addAppAt } from '../src/lib/appList.js';
 
 test('makeApp generates id and trims fields', () => {
   const a = makeApp({ name: '  Gmail ', url: ' https://mail.google.com ' });
@@ -128,5 +128,32 @@ test('moveAppTo does not mutate the input list', () => {
   for (const n of ['A', 'B', 'C']) list = addApp(list, { name: n, url: `https://${n.toLowerCase()}.com` });
   const snapshot = JSON.stringify(list);
   moveAppTo(list, list[0].id, 2);
+  assert.equal(JSON.stringify(list), snapshot);
+});
+
+test('addAppAt inserts at the given index', () => {
+  let list = addApp(addApp([], { name: 'A', url: 'https://a.com' }), { name: 'C', url: 'https://c.com' });
+  list = addAppAt(list, { name: 'B', url: 'https://b.com' }, 1);
+  assert.deepEqual(list.map((a) => a.name), ['A', 'B', 'C']);
+});
+
+test('addAppAt inserts at the start and end', () => {
+  let list = addApp([], { name: 'B', url: 'https://b.com' });
+  assert.deepEqual(addAppAt(list, { name: 'A', url: 'https://a.com' }, 0).map((a) => a.name), ['A', 'B']);
+  assert.deepEqual(addAppAt(list, { name: 'C', url: 'https://c.com' }, 1).map((a) => a.name), ['B', 'C']);
+});
+
+test('addAppAt clamps an out-of-range index', () => {
+  const list = addApp([], { name: 'A', url: 'https://a.com' });
+  assert.deepEqual(addAppAt(list, { name: 'X', url: 'https://x.com' }, -5).map((a) => a.name), ['X', 'A']);
+  assert.deepEqual(addAppAt(list, { name: 'Y', url: 'https://y.com' }, 99).map((a) => a.name), ['A', 'Y']);
+});
+
+test('addAppAt generates an id and does not mutate the input', () => {
+  const list = addApp([], { name: 'A', url: 'https://a.com' });
+  const snapshot = JSON.stringify(list);
+  const next = addAppAt(list, { name: 'B', url: 'https://b.com' }, 0);
+  assert.equal(typeof next[0].id, 'string');
+  assert.ok(next[0].id.length > 0);
   assert.equal(JSON.stringify(list), snapshot);
 });
