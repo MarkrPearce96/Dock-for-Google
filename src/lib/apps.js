@@ -14,6 +14,7 @@ export const SEED_APPS = [
 export const CATALOG_APPS = [
   ...SEED_APPS,
   { name: 'YouTube', url: 'https://www.youtube.com', iconUrl: 'icons/apps/youtube.svg' },
+  { name: 'Meet', url: 'https://meet.google.com', iconUrl: 'icons/apps/meet.png' },
   { name: 'Gemini', url: 'https://gemini.google.com', iconUrl: 'icons/apps/gemini.png' },
   { name: 'Classroom', url: 'https://classroom.google.com', iconUrl: 'icons/apps/classroom.png' },
   { name: 'Analytics', url: 'https://analytics.google.com', iconUrl: 'icons/apps/analytics.svg' },
