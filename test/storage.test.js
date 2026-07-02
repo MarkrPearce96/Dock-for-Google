@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { STORAGE_KEY, loadApps, saveApps, seedIfEmpty } from '../src/lib/storage.js';
+import { STORAGE_KEY, INIT_KEY, loadApps, saveApps, seedIfEmpty } from '../src/lib/storage.js';
 
 function mockArea(initial = {}) {
   const store = { ...initial };
@@ -40,4 +40,24 @@ test('seedIfEmpty leaves an existing list untouched', async () => {
   const existing = [{ id: '1', name: 'Only', url: 'https://only.com' }];
   const area = mockArea({ [STORAGE_KEY]: existing });
   assert.deepEqual(await seedIfEmpty(area), existing);
+});
+
+test('seedIfEmpty marks the store initialized on first run', async () => {
+  const area = mockArea();
+  await seedIfEmpty(area);
+  assert.equal(area.store[INIT_KEY], true);
+});
+
+test('seedIfEmpty does not re-seed an empty list once initialized', async () => {
+  const area = mockArea({ [INIT_KEY]: true });
+  const result = await seedIfEmpty(area);
+  assert.deepEqual(result, []);
+  assert.ok(!area.store[STORAGE_KEY] || area.store[STORAGE_KEY].length === 0);
+});
+
+test('seedIfEmpty backfills the initialized marker for an existing list', async () => {
+  const existing = [{ id: '1', name: 'Only', url: 'https://only.com' }];
+  const area = mockArea({ [STORAGE_KEY]: existing });
+  assert.deepEqual(await seedIfEmpty(area), existing);
+  assert.equal(area.store[INIT_KEY], true);
 });
