@@ -1,5 +1,5 @@
 import { seedIfEmpty, saveApps } from './lib/storage.js';
-import { filterApps, SEED_APPS, draftFromTab } from './lib/apps.js';
+import { filterApps, SEED_APPS, draftFromTab, findDuplicate } from './lib/apps.js';
 import { makeApp, addApp } from './lib/appList.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, DEFAULT_PREFS } from './lib/prefs.js';
@@ -18,9 +18,11 @@ const addIcon = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
 const addCancel = document.getElementById('add-cancel');
 const addNote = document.getElementById('add-note');
+const addSave = document.getElementById('add-save');
 
 let allApps = [];
 let prefs = { ...DEFAULT_PREFS };
+let dupAcknowledged = false;
 
 function isValidUrl(value) {
   try {
@@ -87,6 +89,8 @@ function showAddForm(draft) {
   addIcon.value = draft.iconUrl;
   addError.hidden = true;
   addNote.hidden = true;
+  dupAcknowledged = false;
+  addSave.textContent = 'Add';
   addDialog.showModal();
   addName.focus();
 }
@@ -95,6 +99,8 @@ function hideAddForm() {
   addDialog.close();
   addForm.reset();
   addError.hidden = true;
+  dupAcknowledged = false;
+  addSave.textContent = 'Add';
 }
 
 search.addEventListener('input', () => {
@@ -131,6 +137,14 @@ addForm.addEventListener('submit', async (e) => {
     addError.hidden = false;
     return;
   }
+  const dupe = findDuplicate(allApps, addUrl.value);
+  if (dupe && !dupAcknowledged) {
+    addError.textContent = `"${dupe.name}" is already in your Dock.`;
+    addError.hidden = false;
+    addSave.textContent = 'Add anyway';
+    dupAcknowledged = true;
+    return;
+  }
   allApps = addApp(allApps, {
     name: addName.value,
     url: addUrl.value,
@@ -142,6 +156,11 @@ addForm.addEventListener('submit', async (e) => {
 });
 
 addCancel.addEventListener('click', () => hideAddForm());
+
+addUrl.addEventListener('input', () => {
+  dupAcknowledged = false;
+  addSave.textContent = 'Add';
+});
 
 // Native Escape/backdrop close still resets the form.
 addDialog.addEventListener('close', () => {

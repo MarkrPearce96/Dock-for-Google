@@ -1,7 +1,7 @@
 import Sortable from './lib/Sortable.esm.js';
 import { seedIfEmpty, saveApps } from './lib/storage.js';
 import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
-import { SEED_APPS, CATALOG_APPS, filterApps, catalogAvailable } from './lib/apps.js';
+import { SEED_APPS, CATALOG_APPS, filterApps, catalogAvailable, findDuplicate } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
 import { applyTheme } from './lib/theme.js';
@@ -22,6 +22,7 @@ const urlInput = document.getElementById('add-url');
 const iconInput = document.getElementById('add-icon');
 const addError = document.getElementById('add-error');
 const cancelBtn = document.getElementById('cancel-custom');
+const saveBtn = form.querySelector('button[type="submit"]');
 const prefNewTab = document.getElementById('pref-new-tab');
 const prefBackground = document.getElementById('pref-background');
 const prefSearch = document.getElementById('pref-search');
@@ -34,6 +35,7 @@ const importFile = document.getElementById('import-file');
 const backupStatus = document.getElementById('backup-status');
 
 let apps = [];
+let dupAcknowledged = false;
 
 function isValidUrl(value) {
   try {
@@ -185,15 +187,24 @@ new Sortable(availableGrid, {
 search.addEventListener('input', render);
 
 createBtn.addEventListener('click', () => {
+  dupAcknowledged = false;
+  saveBtn.textContent = 'Save';
   dialog.showModal();
   nameInput.focus();
 });
 
 cancelBtn.addEventListener('click', () => dialog.close());
 
+urlInput.addEventListener('input', () => {
+  dupAcknowledged = false;
+  saveBtn.textContent = 'Save';
+});
+
 dialog.addEventListener('close', () => {
   form.reset();
   addError.hidden = true;
+  dupAcknowledged = false;
+  saveBtn.textContent = 'Save';
 });
 
 form.addEventListener('submit', async (e) => {
@@ -202,6 +213,14 @@ form.addEventListener('submit', async (e) => {
   if (!isValidUrl(urlInput.value)) {
     addError.textContent = 'Enter a valid http(s) URL.';
     addError.hidden = false;
+    return;
+  }
+  const dupe = findDuplicate(apps, urlInput.value);
+  if (dupe && !dupAcknowledged) {
+    addError.textContent = `"${dupe.name}" is already in your Dock.`;
+    addError.hidden = false;
+    saveBtn.textContent = 'Add anyway';
+    dupAcknowledged = true;
     return;
   }
   await persist(addApp(apps, {
