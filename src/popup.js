@@ -101,6 +101,7 @@ function hideAddForm() {
 }
 
 search.addEventListener('input', () => {
+  addNote.hidden = true;
   render(filterApps(allApps, search.value));
 });
 
