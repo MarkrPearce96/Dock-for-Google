@@ -18,6 +18,11 @@ export const CATALOG_APPS = [
   { name: 'Gemini', url: 'https://gemini.google.com', iconUrl: 'icons/apps/gemini.png' },
   { name: 'Classroom', url: 'https://classroom.google.com', iconUrl: 'icons/apps/classroom.png' },
   { name: 'Analytics', url: 'https://analytics.google.com', iconUrl: 'icons/apps/analytics.svg' },
+  { name: 'Search', url: 'https://www.google.com', iconUrl: 'icons/apps/search.svg' },
+  { name: 'Calendar', url: 'https://calendar.google.com', iconUrl: 'icons/apps/calendar.png' },
+  { name: 'Keep', url: 'https://keep.google.com', iconUrl: 'icons/apps/keep.png' },
+  { name: 'Contacts', url: 'https://contacts.google.com', iconUrl: 'icons/apps/contacts.svg' },
+  { name: 'Account', url: 'https://myaccount.google.com', iconUrl: 'icons/apps/account.svg' },
 ];
 
 export function filterApps(apps, query) {
