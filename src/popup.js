@@ -166,6 +166,8 @@ addUrl.addEventListener('input', () => {
 addDialog.addEventListener('close', () => {
   addForm.reset();
   addError.hidden = true;
+  dupAcknowledged = false;
+  addSave.textContent = 'Add';
 });
 
 async function init() {
