@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "App Launcher",
+  "name": "Dock for Google",
   "version": "1.0",
   "description": "A searchable grid launcher for your favorite web apps.",
   "action": {

@@ -25,7 +25,7 @@ export function parseBackup(text) {
     throw new Error('Not a valid backup file.');
   }
   if (!data || data.app !== BACKUP_APP || !Array.isArray(data.apps)) {
-    throw new Error("This isn't an App Launcher backup.");
+    throw new Error("This isn't a Dock for Google backup.");
   }
   const apps = data.apps
     .filter((a) => a && a.name && isHttpUrl(a.url))

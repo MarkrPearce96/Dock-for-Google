@@ -1,4 +1,4 @@
-# Installing App Launcher in Safari
+# Installing Dock for Google in Safari
 
 ## One-time build
 1. Open Terminal and move into the project folder first (every command below is
@@ -10,24 +10,24 @@
 3. Run the converter:
    ```
    xcrun safari-web-extension-converter "src" --project-location "." \
-     --app-name "App Launcher" --bundle-identifier "com.mark.App-Launcher" \
+     --app-name "Dock for Google" --bundle-identifier "com.mark.Dock-for-Google" \
      --macos-only --no-open --force
    ```
-4. Open `App Launcher/App Launcher.xcodeproj` in Xcode.
-5. Select the **App Launcher** scheme and press **Run** (⌘R). A small
+4. Open `Dock for Google/Dock for Google.xcodeproj` in Xcode.
+5. Select the **Dock for Google** scheme and press **Run** (⌘R). A small
    container app window appears — you can close it; the extension is now registered.
 
 ## Enable in Safari
 1. Safari → Settings → **Advanced** → check **Show features for web developers**.
 2. In the new **Develop** menu, choose **Allow unsigned extensions**
    (you re-do this each time Safari restarts, unless you sign the app — see below).
-3. Safari → Settings → **Extensions** → enable **App Launcher**.
-4. Click the puzzle-piece / extension icon in the toolbar → **App Launcher** to open the popup.
+3. Safari → Settings → **Extensions** → enable **Dock for Google**.
+4. Click the puzzle-piece / extension icon in the toolbar → **Dock for Google** to open the popup.
 
 ## Using it
 - Click the toolbar icon → search box + app grid.
 - Type to filter by name; click an icon to open it in a new tab.
-- Click the gear (⚙) in the popup, or Safari → Settings → Extensions → App Launcher →
+- Click the gear (⚙) in the popup, or Safari → Settings → Extensions → Dock for Google →
   the extension's options, to **add / edit / delete / reorder** apps.
 
 ## Make it permanent (optional)
@@ -37,7 +37,7 @@ Unsigned extensions turn off when Safari quits. To keep it enabled:
 3. Run once more. The extension now persists across restarts without the Develop-menu step.
 
 ## Updating the app list code later
-Edit files in `src/`, re-run the converter (step 2) with `--force`, then rebuild with the **App Launcher** scheme in Xcode.
+Edit files in `src/`, re-run the converter (step 2) with `--force`, then rebuild with the **Dock for Google** scheme in Xcode.
 The stored app list persists across rebuilds (it lives in Safari's extension storage).
 
 ## Verify it works

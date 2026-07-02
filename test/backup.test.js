@@ -30,9 +30,9 @@ test('parseBackup throws on non-JSON', () => {
 });
 
 test('parseBackup rejects a foreign or malformed object', () => {
-  assert.throws(() => parseBackup(JSON.stringify({ hello: 'world' })), /isn't an App Launcher backup/);
-  assert.throws(() => parseBackup(JSON.stringify({ app: 'other', apps: [] })), /isn't an App Launcher backup/);
-  assert.throws(() => parseBackup(JSON.stringify({ app: 'app-launcher', apps: 'nope' })), /isn't an App Launcher backup/);
+  assert.throws(() => parseBackup(JSON.stringify({ hello: 'world' })), /isn't a Dock for Google backup/);
+  assert.throws(() => parseBackup(JSON.stringify({ app: 'other', apps: [] })), /isn't a Dock for Google backup/);
+  assert.throws(() => parseBackup(JSON.stringify({ app: 'app-launcher', apps: 'nope' })), /isn't a Dock for Google backup/);
 });
 
 test('parseBackup drops malformed apps and merges partial prefs over defaults', () => {
