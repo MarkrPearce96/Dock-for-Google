@@ -1,6 +1,9 @@
 node_modules/
 .DS_Store
-*.xcodeproj/
-App Launcher/
 .superpowers/
-Dock for Google/
+
+# Xcode per-user state — not project source
+xcuserdata/
+*.xcuserstate
+build/
+DerivedData/
