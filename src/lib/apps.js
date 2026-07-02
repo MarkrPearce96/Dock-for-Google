@@ -48,6 +48,11 @@ export function catalogAvailable(catalog, myApps) {
   return catalog.filter((entry) => !have.has(normalizeUrl(entry.url)));
 }
 
+export function findDuplicate(apps, url) {
+  const target = normalizeUrl(url);
+  return apps.find((a) => normalizeUrl(a.url) === target) || null;
+}
+
 export function draftFromTab(tab) {
   const url = (tab && tab.url) || '';
   if (!/^https?:/i.test(url)) return null;
