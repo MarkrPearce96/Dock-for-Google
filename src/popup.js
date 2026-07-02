@@ -1,6 +1,6 @@
-import { seedIfEmpty } from './lib/storage.js';
-import { filterApps, SEED_APPS } from './lib/apps.js';
-import { makeApp } from './lib/appList.js';
+import { seedIfEmpty, saveApps } from './lib/storage.js';
+import { filterApps, SEED_APPS, draftFromTab } from './lib/apps.js';
+import { makeApp, addApp } from './lib/appList.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, DEFAULT_PREFS } from './lib/prefs.js';
 import { applyTheme } from './lib/theme.js';
@@ -9,9 +9,26 @@ const grid = document.getElementById('grid');
 const emptyMsg = document.getElementById('empty');
 const search = document.getElementById('search');
 const settingsBtn = document.getElementById('open-settings');
+const addPageBtn = document.getElementById('add-page');
+const addForm = document.getElementById('add-form');
+const addName = document.getElementById('add-name');
+const addUrl = document.getElementById('add-url');
+const addIcon = document.getElementById('add-icon');
+const addError = document.getElementById('add-error');
+const addCancel = document.getElementById('add-cancel');
+const addNote = document.getElementById('add-note');
 
 let allApps = [];
 let prefs = { ...DEFAULT_PREFS };
+
+function isValidUrl(value) {
+  try {
+    const u = new URL(value);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
 function applyColumns(n) {
   const cols = [3, 4, 5].includes(n) ? n : 3;
@@ -63,12 +80,72 @@ function render(apps) {
   }
 }
 
+function showAddForm(draft) {
+  addName.value = draft.name;
+  addUrl.value = draft.url;
+  addIcon.value = draft.iconUrl;
+  addError.hidden = true;
+  addNote.hidden = true;
+  grid.hidden = true;
+  emptyMsg.hidden = true;
+  addForm.hidden = false;
+  addName.focus();
+}
+
+function hideAddForm() {
+  addForm.hidden = true;
+  addForm.reset();
+  addError.hidden = true;
+  grid.hidden = false;
+  render(filterApps(allApps, search.value));
+}
+
 search.addEventListener('input', () => {
   render(filterApps(allApps, search.value));
 });
 
 settingsBtn.addEventListener('click', () => {
   browser.runtime.openOptionsPage();
+});
+
+addPageBtn.addEventListener('click', async () => {
+  addNote.hidden = true;
+  let tab = null;
+  try {
+    [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  } catch (e) {
+    tab = null;
+  }
+  const draft = draftFromTab(tab);
+  if (!draft) {
+    addNote.textContent = "Can't add this page.";
+    addNote.hidden = false;
+    return;
+  }
+  showAddForm(draft);
+});
+
+addForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  addError.hidden = true;
+  if (!isValidUrl(addUrl.value)) {
+    addError.textContent = 'Enter a valid http(s) URL.';
+    addError.hidden = false;
+    return;
+  }
+  allApps = addApp(allApps, {
+    name: addName.value,
+    url: addUrl.value,
+    iconUrl: addIcon.value,
+  });
+  await saveApps(allApps);
+  hideAddForm();
+});
+
+addCancel.addEventListener('click', () => hideAddForm());
+
+addForm.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hideAddForm();
 });
 
 async function init() {
