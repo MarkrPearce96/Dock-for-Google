@@ -213,8 +213,10 @@ form.addEventListener('submit', async (e) => {
 });
 
 restoreBtn.addEventListener('click', async () => {
-  if (confirm('Replace your shortcuts with the default apps? This cannot be undone.')) {
-    await persist(SEED_APPS.map(makeApp));
+  if (confirm('Reset your shortcuts and all settings to their defaults? This cannot be undone.')) {
+    await saveApps(SEED_APPS.map(makeApp));
+    await savePrefs({ ...DEFAULT_PREFS });
+    location.reload();
   }
 });
 
