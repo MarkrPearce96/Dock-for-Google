@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SEED_APPS, CATALOG_APPS, filterApps, normalizeUrl, catalogAvailable, draftFromTab } from '../src/lib/apps.js';
+import { SEED_APPS, CATALOG_APPS, filterApps, normalizeUrl, catalogAvailable, draftFromTab, findDuplicate } from '../src/lib/apps.js';
 
 const apps = [
   { name: 'Gmail', url: 'https://mail.google.com' },
@@ -97,4 +97,31 @@ test('draftFromTab returns null for non-http(s) pages', () => {
   assert.equal(draftFromTab({ url: 'safari-web-extension://abc/options.html', title: 'x' }), null);
   assert.equal(draftFromTab(null), null);
   assert.equal(draftFromTab({}), null);
+});
+
+test('findDuplicate returns the matching app for an exact url', () => {
+  const list = [
+    { id: '1', name: 'Maps', url: 'https://maps.google.com' },
+    { id: '2', name: 'Gmail', url: 'https://mail.google.com' },
+  ];
+  assert.equal(findDuplicate(list, 'https://maps.google.com').name, 'Maps');
+});
+
+test('findDuplicate matches ignoring case and a trailing slash', () => {
+  const list = [{ id: '1', name: 'Maps', url: 'https://maps.google.com' }];
+  assert.equal(findDuplicate(list, 'https://Maps.google.com/').name, 'Maps');
+});
+
+test('findDuplicate returns null when the url is not present', () => {
+  const list = [{ id: '1', name: 'Maps', url: 'https://maps.google.com' }];
+  assert.equal(findDuplicate(list, 'https://docs.google.com'), null);
+});
+
+test('findDuplicate returns null for an empty list', () => {
+  assert.equal(findDuplicate([], 'https://maps.google.com'), null);
+});
+
+test('findDuplicate matches malformed urls on trimmed string equality', () => {
+  const list = [{ id: '1', name: 'Weird', url: '  not a url  ' }];
+  assert.equal(findDuplicate(list, 'not a url').name, 'Weird');
 });
