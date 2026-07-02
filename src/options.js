@@ -1,7 +1,7 @@
 import Sortable from './lib/Sortable.esm.js';
 import { seedIfEmpty, saveApps } from './lib/storage.js';
 import { addApp, addAppAt, removeApp, makeApp } from './lib/appList.js';
-import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
+import { SEED_APPS, CATALOG_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
 import { applyTheme } from './lib/theme.js';
@@ -106,7 +106,7 @@ function render() {
   apps.forEach((app) => myGrid.append(makeMyTile(app)));
   myEmpty.hidden = apps.length !== 0;
 
-  const allAvailable = catalogAvailable(SEED_APPS, apps);
+  const allAvailable = catalogAvailable(CATALOG_APPS, apps);
   const available = filterApps(allAvailable, search.value);
   availableGrid.textContent = '';
   available.forEach((entry) => availableGrid.append(makeAvailableTile(entry)));

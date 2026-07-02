@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SEED_APPS, filterApps, normalizeUrl, catalogAvailable } from '../src/lib/apps.js';
+import { SEED_APPS, CATALOG_APPS, filterApps, normalizeUrl, catalogAvailable } from '../src/lib/apps.js';
 
 const apps = [
   { name: 'Gmail', url: 'https://mail.google.com' },
@@ -34,6 +34,18 @@ test('SEED_APPS is a non-empty list of name+url objects', () => {
 
 test('every default app ships with a local SVG icon path', () => {
   for (const a of SEED_APPS) {
+    assert.match(a.iconUrl, /^icons\/apps\/.+\.(svg|png)$/);
+  }
+});
+
+test('CATALOG_APPS contains every default app plus catalog-only extras with local icons', () => {
+  for (const a of SEED_APPS) {
+    assert.ok(CATALOG_APPS.some((c) => c.name === a.name && c.url === a.url));
+  }
+  const extras = CATALOG_APPS.filter((c) => !SEED_APPS.some((s) => s.url === c.url));
+  assert.ok(extras.length > 0);
+  for (const a of extras) {
+    assert.match(a.url, /^https:\/\//);
     assert.match(a.iconUrl, /^icons\/apps\/.+\.(svg|png)$/);
   }
 });

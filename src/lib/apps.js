@@ -9,6 +9,16 @@ export const SEED_APPS = [
   { name: 'Translate', url: 'https://translate.google.com', iconUrl: 'icons/apps/translate.png' },
 ];
 
+// The full catalog shown in the "Available" panel: the default seed plus extra
+// apps you can add but that are not part of the default set.
+export const CATALOG_APPS = [
+  ...SEED_APPS,
+  { name: 'YouTube', url: 'https://www.youtube.com', iconUrl: 'icons/apps/youtube.svg' },
+  { name: 'Gemini', url: 'https://gemini.google.com', iconUrl: 'icons/apps/gemini.png' },
+  { name: 'Classroom', url: 'https://classroom.google.com', iconUrl: 'icons/apps/classroom.png' },
+  { name: 'Analytics', url: 'https://analytics.google.com', iconUrl: 'icons/apps/analytics.svg' },
+];
+
 export function filterApps(apps, query) {
   const q = query.trim().toLowerCase();
   if (q === '') return apps;
