@@ -52,3 +52,18 @@ test('parseBackup drops malformed apps and merges partial prefs over defaults', 
   assert.equal(out.prefs.theme, 'dark');
   assert.equal(out.prefs.openInNewTab, true);
 });
+
+test('parseBackup drops entries with non-http(s) urls', () => {
+  const text = JSON.stringify({
+    app: 'app-launcher',
+    version: 1,
+    apps: [
+      { name: 'Good', url: 'https://good.com' },
+      { name: 'Evil', url: 'javascript:alert(1)' },
+      { name: 'Ftp', url: 'ftp://example.com' },
+    ],
+    prefs: {},
+  });
+  const out = parseBackup(text);
+  assert.deepEqual(out.apps.map((a) => a.name), ['Good']);
+});

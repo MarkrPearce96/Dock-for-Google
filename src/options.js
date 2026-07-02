@@ -299,7 +299,7 @@ exportBtn.addEventListener('click', async () => {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 });
 
 importBtn.addEventListener('click', () => importFile.click());
