@@ -10,6 +10,7 @@ const emptyMsg = document.getElementById('empty');
 const search = document.getElementById('search');
 const settingsBtn = document.getElementById('open-settings');
 const addPageBtn = document.getElementById('add-page');
+const addDialog = document.getElementById('add-dialog');
 const addForm = document.getElementById('add-form');
 const addName = document.getElementById('add-name');
 const addUrl = document.getElementById('add-url');
@@ -86,18 +87,14 @@ function showAddForm(draft) {
   addIcon.value = draft.iconUrl;
   addError.hidden = true;
   addNote.hidden = true;
-  grid.hidden = true;
-  emptyMsg.hidden = true;
-  addForm.hidden = false;
+  addDialog.showModal();
   addName.focus();
 }
 
 function hideAddForm() {
-  addForm.hidden = true;
+  addDialog.close();
   addForm.reset();
   addError.hidden = true;
-  grid.hidden = false;
-  render(filterApps(allApps, search.value));
 }
 
 search.addEventListener('input', () => {
@@ -140,13 +137,16 @@ addForm.addEventListener('submit', async (e) => {
     iconUrl: addIcon.value,
   });
   await saveApps(allApps);
+  render(filterApps(allApps, search.value));
   hideAddForm();
 });
 
 addCancel.addEventListener('click', () => hideAddForm());
 
-addForm.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') hideAddForm();
+// Native Escape/backdrop close still resets the form.
+addDialog.addEventListener('close', () => {
+  addForm.reset();
+  addError.hidden = true;
 });
 
 async function init() {

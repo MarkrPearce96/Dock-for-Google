@@ -13,16 +13,19 @@
   <div id="grid" class="grid"></div>
   <p id="empty" class="empty" hidden>No apps yet — open Settings to add some.</p>
   <p id="add-note" class="note" hidden></p>
-  <form id="add-form" class="add-form" hidden>
-    <label>Name <input id="add-name" type="text" required /></label>
-    <label>URL <input id="add-url" type="url" required /></label>
-    <label>Icon URL (optional) <input id="add-icon" type="url" /></label>
-    <p id="add-error" class="error" hidden></p>
-    <div class="add-actions">
-      <button id="add-cancel" type="button">Cancel</button>
-      <button id="add-save" type="submit">Add</button>
-    </div>
-  </form>
+  <dialog id="add-dialog" class="modal">
+    <form id="add-form" class="add-form">
+      <h2>Add this page</h2>
+      <label>Name <input id="add-name" type="text" required /></label>
+      <label>URL <input id="add-url" type="url" required /></label>
+      <label>Icon URL (optional) <input id="add-icon" type="url" /></label>
+      <p id="add-error" class="error" hidden></p>
+      <div class="add-actions">
+        <button id="add-cancel" type="button">Cancel</button>
+        <button id="add-save" type="submit">Add</button>
+      </div>
+    </form>
+  </dialog>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
