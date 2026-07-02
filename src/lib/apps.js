@@ -47,3 +47,17 @@ export function catalogAvailable(catalog, myApps) {
   const have = new Set(myApps.map((a) => normalizeUrl(a.url)));
   return catalog.filter((entry) => !have.has(normalizeUrl(entry.url)));
 }
+
+export function draftFromTab(tab) {
+  const url = (tab && tab.url) || '';
+  if (!/^https?:/i.test(url)) return null;
+  let name = (tab.title || '').trim();
+  if (!name) {
+    try {
+      name = new URL(url).hostname;
+    } catch {
+      name = url;
+    }
+  }
+  return { name, url, iconUrl: tab.favIconUrl || '' };
+}

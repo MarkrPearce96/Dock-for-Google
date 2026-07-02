@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SEED_APPS, CATALOG_APPS, filterApps, normalizeUrl, catalogAvailable } from '../src/lib/apps.js';
+import { SEED_APPS, CATALOG_APPS, filterApps, normalizeUrl, catalogAvailable, draftFromTab } from '../src/lib/apps.js';
 
 const apps = [
   { name: 'Gmail', url: 'https://mail.google.com' },
@@ -79,4 +79,22 @@ test('catalogAvailable ignores custom (non-catalog) apps', () => {
   const catalog = [{ name: 'A', url: 'https://a.com' }];
   const mine = [{ id: '1', name: 'Custom', url: 'https://custom.example' }];
   assert.deepEqual(catalogAvailable(catalog, mine).map((e) => e.name), ['A']);
+});
+
+test('draftFromTab builds a draft from an http(s) tab', () => {
+  const d = draftFromTab({ url: 'https://poni.com/x', title: 'PoniPack', favIconUrl: 'https://poni.com/f.ico' });
+  assert.deepEqual(d, { name: 'PoniPack', url: 'https://poni.com/x', iconUrl: 'https://poni.com/f.ico' });
+});
+
+test('draftFromTab falls back to hostname when title is empty', () => {
+  const d = draftFromTab({ url: 'https://sub.example.com/p', title: '   ', favIconUrl: '' });
+  assert.equal(d.name, 'sub.example.com');
+  assert.equal(d.iconUrl, '');
+});
+
+test('draftFromTab returns null for non-http(s) pages', () => {
+  assert.equal(draftFromTab({ url: 'about:blank', title: 'x' }), null);
+  assert.equal(draftFromTab({ url: 'safari-web-extension://abc/options.html', title: 'x' }), null);
+  assert.equal(draftFromTab(null), null);
+  assert.equal(draftFromTab({}), null);
 });
