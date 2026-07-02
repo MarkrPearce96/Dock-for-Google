@@ -227,3 +227,9 @@ body.sorting .tile:hover { background: transparent; }
 .toggle input[type="checkbox"]:checked { background: var(--accent); }
 .toggle input[type="checkbox"]:checked::after { transform: translateX(18px); }
 .toggle input[type="checkbox"]:disabled { opacity: 0.4; cursor: default; }
+
+/* Backup & restore */
+.backup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.status { font-size: 13px; margin: 0; }
+.status.error { color: var(--danger); }
+.status.ok { color: var(--muted); }

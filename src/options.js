@@ -5,6 +5,7 @@ import { SEED_APPS, filterApps, catalogAvailable } from './lib/apps.js';
 import { resolveIcon } from './lib/icons.js';
 import { loadPrefs, savePrefs, DEFAULT_PREFS } from './lib/prefs.js';
 import { applyTheme } from './lib/theme.js';
+import { buildBackup, parseBackup } from './lib/backup.js';
 
 const availableGrid = document.getElementById('available-grid');
 const availableEmpty = document.getElementById('available-empty');
@@ -27,6 +28,10 @@ const prefSearch = document.getElementById('pref-search');
 const prefLabels = document.getElementById('pref-labels');
 const prefTheme = document.getElementById('pref-theme');
 const prefColumns = document.getElementById('pref-columns');
+const exportBtn = document.getElementById('export-backup');
+const importBtn = document.getElementById('import-backup');
+const importFile = document.getElementById('import-file');
+const backupStatus = document.getElementById('backup-status');
 
 let apps = [];
 
@@ -269,3 +274,49 @@ async function initPrefs() {
 
 init();
 initPrefs();
+
+function showBackupStatus(message, kind) {
+  backupStatus.textContent = message;
+  backupStatus.className = `status ${kind}`;
+  backupStatus.hidden = false;
+}
+
+exportBtn.addEventListener('click', async () => {
+  let currentPrefs;
+  try {
+    currentPrefs = await loadPrefs();
+  } catch {
+    currentPrefs = { ...DEFAULT_PREFS };
+  }
+  const blob = new Blob(
+    [JSON.stringify(buildBackup(apps, currentPrefs), null, 2)],
+    { type: 'application/json' }
+  );
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'app-launcher-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+importBtn.addEventListener('click', () => importFile.click());
+
+importFile.addEventListener('change', async () => {
+  const file = importFile.files && importFile.files[0];
+  importFile.value = '';
+  if (!file) return;
+  let result;
+  try {
+    result = parseBackup(await file.text());
+  } catch (e) {
+    showBackupStatus(e.message, 'error');
+    return;
+  }
+  if (!confirm('Replace your apps and settings with this backup? This cannot be undone.')) return;
+  await saveApps(result.apps);
+  await savePrefs(result.prefs);
+  location.reload();
+});

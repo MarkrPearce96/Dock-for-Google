@@ -55,6 +55,16 @@
       </label>
     </section>
 
+    <section class="card">
+      <h2>Backup &amp; restore</h2>
+      <div class="backup-actions">
+        <button id="export-backup" type="button">Export backup</button>
+        <button id="import-backup" class="secondary" type="button">Import backup</button>
+      </div>
+      <p id="backup-status" class="status" hidden></p>
+      <input id="import-file" type="file" accept="application/json,.json" hidden />
+    </section>
+
     <dialog id="custom-dialog" class="modal">
       <form id="custom-form">
         <h2>Create custom shortcut</h2>
