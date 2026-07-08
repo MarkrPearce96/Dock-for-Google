@@ -72,8 +72,24 @@ function makeIcon(app) {
 function makeLabel(text) {
   const span = document.createElement('span');
   span.className = 'tile-label';
-  span.textContent = text;
+  const inner = document.createElement('span');
+  inner.className = 'tile-label-text';
+  inner.textContent = text;
+  span.append(inner);
   return span;
+}
+
+// Long titles that overflow their tile scroll on hover instead of stretching
+// the grid. Must run after the tiles are in the DOM so widths can be measured.
+function markScrollableLabels(container) {
+  container.querySelectorAll('.tile-label-text').forEach((inner) => {
+    const overflow = inner.scrollWidth - inner.clientWidth;
+    if (overflow > 1) {
+      inner.classList.add('can-scroll');
+      inner.style.setProperty('--scroll-distance', `${overflow}px`);
+      inner.style.setProperty('--scroll-time', `${Math.max(2.5, overflow / 25)}s`);
+    }
+  });
 }
 
 function makeAvailableTile(entry) {
@@ -106,12 +122,14 @@ function makeMyTile(app) {
 function render() {
   myGrid.textContent = '';
   apps.forEach((app) => myGrid.append(makeMyTile(app)));
+  markScrollableLabels(myGrid);
   myEmpty.hidden = apps.length !== 0;
 
   const allAvailable = catalogAvailable(CATALOG_APPS, apps);
   const available = filterApps(allAvailable, search.value);
   availableGrid.textContent = '';
   available.forEach((entry) => availableGrid.append(makeAvailableTile(entry)));
+  markScrollableLabels(availableGrid);
   if (available.length !== 0) {
     availableEmpty.hidden = true;
   } else {

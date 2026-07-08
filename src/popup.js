@@ -76,10 +76,23 @@ function render(apps) {
     });
 
     const label = document.createElement('span');
-    label.textContent = app.name;
+    label.className = 'label';
+    const labelText = document.createElement('span');
+    labelText.className = 'label-text';
+    labelText.textContent = app.name;
+    label.append(labelText);
 
     button.append(img, label);
     grid.append(button);
+
+    // Long titles that overflow their cell scroll on hover instead of
+    // stretching the grid. Measure once now that the label is laid out.
+    const overflow = labelText.scrollWidth - labelText.clientWidth;
+    if (overflow > 1) {
+      labelText.classList.add('can-scroll');
+      labelText.style.setProperty('--scroll-distance', `${overflow}px`);
+      labelText.style.setProperty('--scroll-time', `${Math.max(2.5, overflow / 25)}s`);
+    }
   }
 }
 

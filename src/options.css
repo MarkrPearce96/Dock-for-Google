@@ -68,7 +68,7 @@ h1 { font-size: 22px; margin: 0 0 4px; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   flex: 1;
   align-content: start;
@@ -86,14 +86,40 @@ h1 { font-size: 22px; margin: 0 0 4px; }
   cursor: pointer;
   font: inherit;
   color: inherit;
+  min-width: 0;
   -webkit-user-select: none;
   user-select: none;
 }
 .tile:hover { background: var(--hover); }
 .tile img { width: 40px; height: 40px; object-fit: contain; border-radius: 9px; pointer-events: none; }
+/* .tile-label clips; .tile-label-text holds the title and slides on hover when it overflows. */
 .tile-label {
-  font-size: 12px; text-align: center; max-width: 100%;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  font-size: 12px;
+}
+.tile-label-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
+}
+.tile:hover .tile-label-text.can-scroll {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  animation: label-marquee var(--scroll-time, 4s) linear infinite alternate;
+}
+@keyframes label-marquee {
+  0%, 12%   { transform: translateX(0); }
+  88%, 100% { transform: translateX(calc(-1 * var(--scroll-distance, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile:hover .tile-label-text.can-scroll { animation: none; }
 }
 
 .tile.mine { cursor: grab; }
