@@ -48,7 +48,7 @@ body {
 #open-settings { font-size: 18px; }
 .grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
   gap: 8px;
   padding: 12px 4px;
 }
@@ -64,18 +64,40 @@ body {
   cursor: pointer;
   font: inherit;
   color: inherit;
+  min-width: 0;
 }
 .app:hover { background: var(--hover); }
 .app img { width: 40px; height: 40px; object-fit: contain; border-radius: 9px; }
-.app span {
-  font-size: 13px;
+/* .label clips; .label-text holds the title and slides on hover when it overflows. */
+.label {
+  display: block;
+  width: 100%;
+  overflow: hidden;
   text-align: center;
+  font-size: 13px;
+}
+.label-text {
+  display: inline-block;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: top;
 }
-body.no-labels .app span { display: none; }
+.app:hover .label-text.can-scroll {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  animation: label-marquee var(--scroll-time, 4s) linear infinite alternate;
+}
+@keyframes label-marquee {
+  0%, 12%   { transform: translateX(0); }
+  88%, 100% { transform: translateX(calc(-1 * var(--scroll-distance, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app:hover .label-text.can-scroll { animation: none; }
+}
+body.no-labels .label { display: none; }
 .empty { text-align: center; color: var(--muted); padding: 24px 8px; }
 .note { text-align: center; color: var(--muted); font-size: 13px; padding: 14px 8px; margin: 0; }
 
