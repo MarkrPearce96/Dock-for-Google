@@ -1,16 +1,23 @@
 name: Build and release
 
-# Only version-tag pushes build. Ordinary branch pushes never start a job.
+# Version-tag pushes build automatically; manual dispatch can recover a missed run.
+# Ordinary branch pushes never start a job.
 on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag to build (for example v1.0.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -24,6 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -32,6 +40,8 @@ jobs:
 
       - name: Validate version and reject existing releases before building
         id: version
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           node --input-type=module <<'JS'
           import { readFileSync, appendFileSync, writeFileSync } from 'node:fs';
@@ -42,11 +52,15 @@ jobs:
             throw new Error('package.json and manifest must have the same x.y.z version.');
           }
           const tag = `v${version}`;
-          if (process.env.GITHUB_REF !== `refs/tags/${tag}`) {
-            throw new Error(`Pushed tag must match package and manifest version: ${tag}`);
+          if (process.env.RELEASE_TAG !== tag) {
+            throw new Error(`Release tag must match package and manifest version: ${tag}`);
           }
           const api = (...args) => JSON.parse(execFileSync('gh', ['api', ...args], { encoding: 'utf8' }));
           const repo = process.env.GH_REPO;
+          let tagged = api(`repos/${repo}/git/ref/tags/${tag}`).object;
+          while (tagged.type === 'tag') tagged = api(`repos/${repo}/git/tags/${tagged.sha}`).object;
+          const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          if (tagged.type !== 'commit' || tagged.sha !== head) throw new Error('Checkout does not match the release tag.');
           const releases = api(`repos/${repo}/releases`, '--paginate', '--slurp').flat();
           if (releases.some(release => release.tag_name === tag)) {
             throw new Error(`${tag} already exists. Bump the version for a new release.`);

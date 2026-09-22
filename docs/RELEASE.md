@@ -27,9 +27,14 @@ For subsequent releases, increment both version fields and add a matching
 The tag must match both version fields. Existing releases stop the job before
 the expensive build.
 
+If a tag push does not start a run, use **Actions → Build and release → Run
+workflow** on the default branch and enter the existing tag (for example
+`v1.0.0`). This builds the tagged commit without moving the tag. Existing releases
+are still rejected before building.
+
 ### Usage controls
 
-- Version-tag pushes only (`v1.0.0`, `v1.0.1`, etc.). Ordinary branch pushes,
+- Version-tag pushes or explicit manual recovery only (`v1.0.0`, `v1.0.1`, etc.). Ordinary branch pushes,
   pull requests, and schedules never build.
 - One standard macOS runner builds both Intel and Apple Silicon in one job.
 - A 15-minute job timeout limits runaway jobs; only one job per version tag runs at a time.
