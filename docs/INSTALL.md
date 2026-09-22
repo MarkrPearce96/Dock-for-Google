@@ -1,52 +1,62 @@
 # Installing Dock for Google in Safari
 
-## One-time build
-1. Open Terminal and move into the project folder first (every command below is
-   relative to it — running them from elsewhere gives "Could not find extension at src"):
-   ```
-   cd "/Users/mark/Documents/Chrome Extension"
-   ```
-2. (No action needed) The toolbar/app icons are committed PNGs in `src/icons/`, rendered from the source `src/icons/app-icon-source.svg`. To change them, replace that SVG and re-render the four `icon-*.png` sizes (48/128/256/512).
-3. Run the converter:
-   ```
-   xcrun safari-web-extension-converter "src" --project-location "." \
-     --app-name "Dock for Google" --bundle-identifier "com.mark.Dock-for-Google" \
-     --macos-only --no-open --force
-   ```
-4. Open `Dock for Google/Dock for Google.xcodeproj` in Xcode.
-5. Select the **Dock for Google** scheme and press **Run** (⌘R). A small
-   container app window appears — you can close it; the extension is now registered.
+## From a personal release app
 
-## Enable in Safari
-1. Safari → Settings → **Advanced** → check **Show features for web developers**.
-2. In the new **Develop** menu, choose **Allow unsigned extensions**
-   (you re-do this each time Safari restarts, unless you sign the app — see below).
-3. Safari → Settings → **Extensions** → enable **Dock for Google**.
-4. Click the puzzle-piece / extension icon in the toolbar → **Dock for Google** to open the popup.
+Download and open `Dock-for-Google-VERSION.dmg`, drag
+**Dock for Google.app** onto the Applications shortcut, then eject the DMG.
+Open the app from Applications once to register the
+extension. The locally packaged app targets macOS 13 or newer and includes Intel
+and Apple Silicon code. It is ad-hoc signed for personal testing, not notarized.
+If macOS blocks a trusted copy you built, review it under System Settings →
+Privacy & Security. Do not disable system-wide security protections.
 
-## Using it
-- Click the toolbar icon → search box + app grid.
-- Type to filter by name; click an icon to open it in a new tab.
-- Click the gear (⚙) in the popup, or Safari → Settings → Extensions → Dock for Google →
-  the extension's options, to **add / edit / delete / reorder** apps.
+Enable Safari's developer features under Settings → Advanced → **Show features
+for web developers**, then enable **Allow unsigned extensions** in Safari's
+Developer settings (or Develop menu, depending on Safari version). Enable
+**Dock for Google** under Safari → Settings → Extensions.
+You may need to allow unsigned extensions again after restarting Safari.
+See [Apple's Safari extension distribution guidance](https://developer.apple.com/documentation/safariservices/distributing-your-safari-web-extension).
 
-## Make it permanent (optional)
-Unsigned extensions turn off when Safari quits. To keep it enabled:
-1. In Xcode, select each target → **Signing & Capabilities**.
-2. Add your **free Apple ID** under Team, letting Xcode manage signing.
-3. Run once more. The extension now persists across restarts without the Develop-menu step.
+## Build from source
 
-## Updating the app list code later
-Edit files in `src/`, re-run the converter (step 2) with `--force`, then rebuild with the **Dock for Google** scheme in Xcode.
-The stored app list persists across rebuilds (it lives in Safari's extension storage).
+1. Install full Xcode, open it, accept the license, and finish installing its
+   required components. Select Xcode's Command Line Tools in Settings → Locations.
+2. Clone this private repository or extract the release source archive.
+3. Open `Dock for Google/Dock for Google.xcodeproj`. The Xcode project is included;
+   regenerating it with the Safari extension converter is unnecessary.
+4. Select the **Dock for Google** scheme. Under each target's Signing &
+   Capabilities, choose an available signing identity for your own account, or
+   use the local ad-hoc build command below for personal testing.
+5. Run (⌘R), then enable the extension in Safari as described above.
+
+To package an ad-hoc app without configuring an Apple team, install Node.js 22+
+and run from the extracted repository root:
+
+```bash
+npm run release
+```
+
+The DMG appears in `dist/vVERSION-dmg/`. See [RELEASE.md](RELEASE.md).
+A free Apple ID does not guarantee permanently enabled Safari extensions;
+signing and distribution depend on the available Apple certificates and Safari's
+requirements. See [Apple's signing guidance](https://developer.apple.com/documentation/safariservices/building-a-safari-app-extension).
+
+## Update and restore
+
+Edit files in `src/`, then rebuild. The project references these files directly.
+Keep the same bundle identifiers to preserve the extension's identity. Shortcuts
+and preferences live in Safari's extension storage; export a backup in the
+extension's settings before replacing the app or moving to another Mac. Import
+that backup on the new Mac after installation.
 
 ## Verify it works
-After enabling the extension, confirm each of these:
-- [ ] Popup opens showing the seeded 8-app grid (Docs, Slides, Sheets, Drive, Gmail, Photos, Maps, Translate).
-- [ ] Typing `dr` in the search box narrows the grid to Drive only.
-- [ ] Clicking an app icon opens its URL in a new tab.
-- [ ] The gear (⚙) button in the popup opens the settings page.
-- [ ] Adding an app with a valid URL saves it, and it appears in the popup grid.
-- [ ] Adding an app with an invalid URL shows an inline error and does not save.
-- [ ] Edit changes a name/URL; Delete removes an app; the ↑/↓ buttons reorder, and the popup reflects the new order.
-- [ ] Entering a custom icon URL overrides the auto-fetched favicon.
+
+- [ ] Popup opens with eight default apps on a fresh installation.
+- [ ] Typing `dr` narrows the default grid to Drive.
+- [ ] Clicking a shortcut opens its URL with the selected tab preferences.
+- [ ] Settings can add, edit, delete, and drag to reorder shortcuts.
+- [ ] Invalid URLs are rejected and duplicate URLs show a warning.
+- [ ] Add-current-page fills in the active page's title and URL.
+- [ ] Theme, grid columns, labels, and search visibility match preferences.
+- [ ] Backup export and import preserve shortcuts and preferences.
+- [ ] Relaunch Safari and confirm the extension can be enabled and used.

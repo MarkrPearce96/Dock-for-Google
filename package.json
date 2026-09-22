@@ -1,9 +1,13 @@
 {
-  "name": "app-launcher",
+  "name": "dock-for-google",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "release": "node scripts/release.mjs"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

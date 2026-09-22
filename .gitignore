@@ -7,3 +7,6 @@ xcuserdata/
 *.xcuserstate
 build/
 DerivedData/
+
+# Local release archives
+/dist/

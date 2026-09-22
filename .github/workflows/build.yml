@@ -1,0 +1,75 @@
+name: Build and release
+
+# Only version-tag pushes build. Ordinary branch pushes never start a job.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # No dependency cache: this project has no npm dependencies.
+
+      - name: Validate version and reject existing releases before building
+        id: version
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync, writeFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const version = JSON.parse(readFileSync('package.json')).version;
+          const manifest = JSON.parse(readFileSync('src/manifest.json'));
+          if (!/^\d+\.\d+\.\d+$/.test(version) || manifest.version !== version) {
+            throw new Error('package.json and manifest must have the same x.y.z version.');
+          }
+          const tag = `v${version}`;
+          if (process.env.GITHUB_REF !== `refs/tags/${tag}`) {
+            throw new Error(`Pushed tag must match package and manifest version: ${tag}`);
+          }
+          const api = (...args) => JSON.parse(execFileSync('gh', ['api', ...args], { encoding: 'utf8' }));
+          const repo = process.env.GH_REPO;
+          const releases = api(`repos/${repo}/releases`, '--paginate', '--slurp').flat();
+          if (releases.some(release => release.tag_name === tag)) {
+            throw new Error(`${tag} already exists. Bump the version for a new release.`);
+          }
+          const changelog = readFileSync('CHANGELOG.md', 'utf8');
+          const section = changelog.split(`## ${version}\n`)[1]?.split('\n## ')[0]?.trim();
+          if (!section) throw new Error(`Missing CHANGELOG.md entry for ${version}.`);
+          writeFileSync(process.env.RUNNER_TEMP + '/release-notes.md', `${section}\n\nPersonal-use macOS 13+ app (Intel and Apple Silicon). Ad-hoc signed, not notarized. Enable unsigned extensions in Safari. Open the DMG, drag Dock for Google to Applications, then open the app.\n`);
+          appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\n`);
+          JS
+
+      - name: Test, build, and verify DMG
+        run: npm run release
+
+      # Upload straight to Releases; no Actions artifacts or persistent caches.
+      - name: Upload and publish GitHub release
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "dist/$RELEASE_TAG-dmg/"*.dmg \
+            --verify-tag \
+            --title "Dock for Google $RELEASE_TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --draft
+          gh release edit "$RELEASE_TAG" --draft=false
