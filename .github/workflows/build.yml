@@ -38,6 +38,23 @@ jobs:
           node-version: '22'
           # No dependency cache: this project has no npm dependencies.
 
+      - name: Import signing certificate
+        env:
+          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          CERT_PATH="$RUNNER_TEMP/cert.p12"
+          echo "$APPLE_CERT_P12_BASE64" | base64 --decode -o "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$APPLE_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+          rm -f "$CERT_PATH"
+
       - name: Validate version and reject existing releases before building
         id: version
         env:
@@ -68,7 +85,7 @@ jobs:
           const changelog = readFileSync('CHANGELOG.md', 'utf8');
           const section = changelog.split(`## ${version}\n`)[1]?.split('\n## ')[0]?.trim();
           if (!section) throw new Error(`Missing CHANGELOG.md entry for ${version}.`);
-          writeFileSync(process.env.RUNNER_TEMP + '/release-notes.md', `${section}\n\nPersonal-use macOS 13+ app (Intel and Apple Silicon). Ad-hoc signed, not notarized. Enable unsigned extensions in Safari. Install via \`brew install --cask markrpearce96/tap/dock-for-google\`, or unzip and drag Dock for Google.app to Applications.\n`);
+          writeFileSync(process.env.RUNNER_TEMP + '/release-notes.md', `${section}\n\nPersonal-use macOS 13+ app (Intel and Apple Silicon). Signed with a personal Apple Development certificate, not notarized. Enable unsigned extensions in Safari. Install via \`brew install --cask markrpearce96/tap/dock-for-google\`, or unzip and drag Dock for Google.app to Applications.\n`);
           appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\n`);
           JS
 
@@ -94,3 +111,7 @@ jobs:
             --notes-file "$RUNNER_TEMP/release-notes.md" \
             --draft
           gh release edit "$RELEASE_TAG" --draft=false
+
+      - name: Remove the temporary signing keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true

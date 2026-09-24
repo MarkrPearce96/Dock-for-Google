@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Fixed: the Safari extension silently failed to register at all (no error, just missing from Settings → Extensions) on current macOS — Safari refuses to compute a code signing dictionary for ad-hoc or self-signed extensions. Release builds are now signed with a real, Apple-issued personal Apple Development certificate (still not notarized) instead of ad-hoc.
+- The release script now verifies the built app's signature chains to a real Apple certificate authority before packaging.
+
 ## 1.1.0
 
 - Installable via Homebrew: `brew install --cask markrpearce96/tap/dock-for-google`.

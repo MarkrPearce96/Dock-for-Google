@@ -18,9 +18,10 @@
 
 The workflow reads the version from `package.json` (currently `1.0.0`), checks it
 matches `src/manifest.json`, tests and builds the app, then publishes `v1.0.0`
-against the exact built commit. It uses the built-in GitHub token; no personal
-access token or Apple signing secrets are needed. Repository rules must permit
-that token to create releases.
+against the exact built commit. It uses the built-in GitHub token for
+publishing; no personal access token is needed. Building itself imports a
+personal Apple Development certificate from repository secrets (see "Signing"
+below) — Repository rules must permit the built-in token to create releases.
 
 For subsequent releases, increment both version fields and add a matching
 `## x.y.z` entry to `CHANGELOG.md`, commit, then push the new version tag.
@@ -73,12 +74,39 @@ sandbox entitlements, creates and verifies a zip archive, and writes only
 Existing output directories are never overwritten; move them aside before
 rebuilding the same version.
 
-The app command builds Release for macOS 13 or newer and uses ad-hoc signing for
-personal testing. It needs no Apple signing secrets, but **is not Developer ID
-signed or notarized**. Safari requires allowing unsigned extensions for this
-build; see [INSTALL.md](INSTALL.md). The script verifies the app's signature;
-manually test the app in Safari before uploading it. Compilation and signature
-verification alone do not establish that the Safari extension works.
+The app command builds Release for macOS 13 or newer, signed with the personal
+Apple Development certificate in your local keychain (see "Signing" below) —
+**not Developer ID signed or notarized**. Safari still requires allowing
+unsigned extensions for this build; see [INSTALL.md](INSTALL.md). The script
+verifies the app's signature, that it chains to a real Apple certificate (not
+ad-hoc/self-signed — Safari silently refuses to register extensions signed
+that way), and its sandbox entitlements; manually test the app in Safari
+before uploading it. Compilation and signature verification alone do not
+establish that the Safari extension works.
+
+## Signing
+
+Ad-hoc signing used to be enough for a personal build, but Safari on current
+macOS refuses to list an ad-hoc or self-signed extension in Settings →
+Extensions at all — no error dialog, it just never appears, even with "Allow
+Unsigned Extensions" on. The fix is a real Apple-issued certificate, and the
+free tier works fine:
+
+- **Locally**: install full Xcode, sign in with your Apple ID under Xcode →
+  Settings → Accounts, then create an "Apple Development" certificate there
+  (Accounts → your Apple ID → Manage Certificates → **+**). Both
+  `npm run release` and Xcode's own Run button then sign with it automatically
+  — no other setup needed.
+- **In CI**: the workflow imports that same certificate from two repository
+  secrets, `APPLE_CERT_P12_BASE64` (the certificate + private key, exported
+  with `security export -k <keychain> -t identities -f pkcs12 -P <password> -o cert.p12`,
+  then base64-encoded) and `APPLE_CERT_PASSWORD` (the export password), into a
+  throwaway keychain before building. Apple Development certificates expire
+  after about a year — if a release build ever fails signing, export a fresh
+  one from Xcode and update the two secrets.
+- This is still not notarized, so Gatekeeper's "unidentified developer"
+  warning on first launch (see [INSTALL.md](INSTALL.md)) is unchanged; the
+  certificate only fixes Safari's extension registration, not Gatekeeper.
 
 ## Optional: upload a local build manually
 

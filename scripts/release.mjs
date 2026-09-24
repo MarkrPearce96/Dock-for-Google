@@ -21,6 +21,13 @@ const runCapture = (command, args, cwd = root) => {
   if (result.status !== 0) throw new Error(`${command} failed (${result.status}): ${result.stderr}`);
   return result.stdout;
 };
+// codesign -d writes Authority=/TeamIdentifier=/etc. to stderr (only --entitlements - goes to stdout).
+const runCaptureStderr = (command, args, cwd = root) => {
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8' });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`${command} failed (${result.status}): ${result.stderr}`);
+  return result.stderr;
+};
 const pkg = JSON.parse(readFileSync(join(root, 'package.json')));
 const manifest = JSON.parse(readFileSync(join(root, 'src/manifest.json')));
 if (!/^\d+\.\d+\.\d+$/.test(pkg.version) || pkg.version !== manifest.version) {
@@ -50,11 +57,16 @@ try {
     '-derivedDataPath', derived, '-destination', 'generic/platform=macOS',
     'ARCHS=arm64 x86_64', 'ONLY_ACTIVE_ARCH=NO', 'MACOSX_DEPLOYMENT_TARGET=13.0',
     `MARKETING_VERSION=${version}`, 'CURRENT_PROJECT_VERSION=1',
-    'CODE_SIGN_STYLE=Manual', 'CODE_SIGN_IDENTITY=-', 'DEVELOPMENT_TEAM=',
+    'CODE_SIGN_STYLE=Manual', 'CODE_SIGN_IDENTITY=Apple Development', 'DEVELOPMENT_TEAM=62P4GYN8E3',
     'CODE_SIGNING_ALLOWED=YES', 'build',
   ]);
   const app = join(derived, 'Build/Products/Release/Dock for Google.app');
   run('/usr/bin/codesign', ['--verify', '--deep', '--strict', app]);
+
+  const signingInfo = runCaptureStderr('/usr/bin/codesign', ['-dvvv', app]);
+  if (!signingInfo.includes('Authority=Apple Root CA')) {
+    throw new Error('Built app is not signed by a real Apple-issued certificate chain (Safari refuses to register extensions signed ad-hoc or self-signed).');
+  }
 
   const entitlements = runCapture('/usr/bin/codesign', ['-d', '--entitlements', '-', '--xml', app]);
   if (!entitlements.trim()) {

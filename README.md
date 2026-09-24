@@ -21,7 +21,8 @@ brew install --cask markrpearce96/tap/dock-for-google
 
 Or download a personal release app, or build the included Xcode project locally.
 See **[docs/INSTALL.md](docs/INSTALL.md)** for installation and Safari's unsigned
-extension settings. Personal release builds are ad-hoc signed, not notarized.
+extension settings. Personal release builds are signed with a personal Apple
+Development certificate, not notarized.
 Export your shortcuts and settings before moving to another Mac.
 
 ## GitHub releases

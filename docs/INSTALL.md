@@ -10,8 +10,8 @@ brew install --cask dock-for-google
 The first `brew install` from this tap prompts a one-time
 `brew trust markrpearce96/tap` (or `brew trust --cask markrpearce96/tap/dock-for-google`)
 confirmation — Homebrew gates casks from third-party taps behind this step.
-Approve it to continue. The Cask is unsigned (ad-hoc, not notarized); see the
-Gatekeeper step below after installing.
+Approve it to continue. The Cask is signed with a personal Apple Development
+certificate but not notarized; see the Gatekeeper step below after installing.
 
 To update: `brew upgrade --cask dock-for-google`. To remove it along with most
 of its saved state: `brew uninstall --zap dock-for-google`.
@@ -32,10 +32,10 @@ Download `Dock-for-Google-VERSION.zip`, unzip it (double-click, or your browser
 unzips it automatically), then drag **Dock for Google.app** to your Applications
 folder. Open the app from Applications once to register the
 extension. The locally packaged app targets macOS 13 or newer and includes Intel
-and Apple Silicon code. It is ad-hoc signed for personal testing, not notarized.
-On first launch Gatekeeper will likely block it as from an "unidentified
-developer" — this is expected for an ad-hoc-signed, non-notarized app, not a
-sign anything is wrong. Open it once anyway: go to System Settings → Privacy
+and Apple Silicon code. It's signed with a personal Apple Development
+certificate, not notarized. On first launch Gatekeeper will likely block it as
+from an "unidentified developer" — this is expected for a non-notarized app,
+not a sign anything is wrong. Open it once anyway: go to System Settings → Privacy
 & Security, scroll down, and click **Open Anyway** next to the warning (only
 needed once per install). Right-click → Open does not reliably bypass this on
 current macOS, so use the System Settings route. Do not disable system-wide
@@ -55,22 +55,24 @@ See [Apple's Safari extension distribution guidance](https://developer.apple.com
 2. Clone this repository or extract the release source archive.
 3. Open `Dock for Google/Dock for Google.xcodeproj`. The Xcode project is included;
    regenerating it with the Safari extension converter is unnecessary.
-4. Select the **Dock for Google** scheme. Under each target's Signing &
-   Capabilities, choose an available signing identity for your own account, or
-   use the local ad-hoc build command below for personal testing.
+4. Select the **Dock for Google** scheme. Sign in with your Apple ID under
+   Xcode → Settings → Accounts and create a free "Apple Development"
+   certificate (Manage Certificates → **+**) if you don't have one — Safari
+   refuses to register extensions signed ad-hoc or self-signed, so a real
+   Apple-issued certificate is required even for personal local builds.
 5. Run (⌘R), then enable the extension in Safari as described above.
 
-To package an ad-hoc app without configuring an Apple team, install Node.js 22+
-and run from the extracted repository root:
+To package a signed release build, install Node.js 22+ and run from the
+extracted repository root (this also uses your Apple Development certificate;
+see [RELEASE.md](RELEASE.md#signing)):
 
 ```bash
 npm run release
 ```
 
 The zip appears in `dist/vVERSION-zip/`. See [RELEASE.md](RELEASE.md).
-A free Apple ID does not guarantee permanently enabled Safari extensions;
-signing and distribution depend on the available Apple certificates and Safari's
-requirements. See [Apple's signing guidance](https://developer.apple.com/documentation/safariservices/building-a-safari-app-extension).
+A free Apple ID's certificate expires after about a year and needs renewing
+via Xcode; see [Apple's signing guidance](https://developer.apple.com/documentation/safariservices/building-a-safari-app-extension).
 
 ## Update and restore
 
@@ -82,6 +84,9 @@ that backup on the new Mac after installation.
 
 ## Verify it works
 
+- [ ] Dock for Google actually appears in Safari → Settings → Extensions after
+      enabling it (Safari silently omits it entirely, with no error shown, if
+      the build isn't signed with a real Apple-issued certificate).
 - [ ] Popup opens with eight default apps on a fresh installation.
 - [ ] Typing `dr` narrows the default grid to Drive.
 - [ ] Clicking a shortcut opens its URL with the selected tab preferences.
