@@ -2,8 +2,8 @@
 
 ## Release using GitHub Actions
 
-1. Keep the repository private and enable GitHub Actions under Settings → Actions
-   → General if you previously disabled it.
+1. Enable GitHub Actions under Settings → Actions → General if you previously
+   disabled it.
 2. Commit and push this workflow and the app changes to the default branch.
 3. Tag the committed release version and push that tag:
 
@@ -63,7 +63,7 @@ Command Line Tools.
 
 1. Update `package.json` and `src/manifest.json` to the same `x.y.z` version.
 2. Add release notes to `CHANGELOG.md`.
-3. Commit the intended changes and push them to the private repository.
+3. Commit the intended changes and push them to the repository.
 4. Run `npm run release` from the repository root.
 
 The command runs tests, builds the universal app, verifies its signature, creates
@@ -80,7 +80,7 @@ verification alone do not establish that the Safari extension works.
 
 ## Optional: upload a local build manually
 
-On GitHub, open the private repository → Releases → Draft a new release.
+On GitHub, open the repository → Releases → Draft a new release.
 To avoid the automated build when uploading a local build, disable the
 **Build and release** workflow in Actions first. Create a tag such as `v1.0.0`,
 targeting the commit you just built. Re-enable the workflow when you want

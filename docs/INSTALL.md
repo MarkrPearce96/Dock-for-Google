@@ -21,7 +21,7 @@ See [Apple's Safari extension distribution guidance](https://developer.apple.com
 
 1. Install full Xcode, open it, accept the license, and finish installing its
    required components. Select Xcode's Command Line Tools in Settings → Locations.
-2. Clone this private repository or extract the release source archive.
+2. Clone this repository or extract the release source archive.
 3. Open `Dock for Google/Dock for Google.xcodeproj`. The Xcode project is included;
    regenerating it with the Safari extension converter is unnecessary.
 4. Select the **Dock for Google** scheme. Under each target's Signing &

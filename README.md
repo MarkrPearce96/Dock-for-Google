@@ -20,9 +20,9 @@ See **[docs/INSTALL.md](docs/INSTALL.md)** for installation and Safari's unsigne
 extension settings. Personal release builds are ad-hoc signed, not notarized.
 Export your shortcuts and settings before moving to another Mac.
 
-## Private GitHub releases
+## GitHub releases
 
-Push a version tag such as **`v1.0.0`** to your private repository. GitHub tests and builds the app, then
+Push a version tag such as **`v1.0.0`** to your repository. GitHub tests and builds the app, then
 publishes a release with a single DMG installer.
 
 The workflow runs **only on version-tag pushes**: one macOS job, a 15-minute timeout,
@@ -57,4 +57,4 @@ The DOM/`browser`-API glue (`src/popup.js`, `src/options.js`) can't run under No
 
 ## License
 
-Private project. Google app names and icons are trademarks of Google LLC; this is a personal launcher and is not affiliated with or endorsed by Google.
+[MIT](LICENSE) for the original source code. Google app names and icons are trademarks of Google LLC; this is a personal launcher and is not affiliated with or endorsed by Google. The bundled Google app icons under `src/icons/apps/` are Google's own copyrighted/trademarked assets, included for interoperability only and not covered by the MIT license — see the [LICENSE](LICENSE) file for details.
