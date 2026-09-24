@@ -68,12 +68,19 @@ jobs:
           const changelog = readFileSync('CHANGELOG.md', 'utf8');
           const section = changelog.split(`## ${version}\n`)[1]?.split('\n## ')[0]?.trim();
           if (!section) throw new Error(`Missing CHANGELOG.md entry for ${version}.`);
-          writeFileSync(process.env.RUNNER_TEMP + '/release-notes.md', `${section}\n\nPersonal-use macOS 13+ app (Intel and Apple Silicon). Ad-hoc signed, not notarized. Enable unsigned extensions in Safari. Open the DMG, drag Dock for Google to Applications, then open the app.\n`);
+          writeFileSync(process.env.RUNNER_TEMP + '/release-notes.md', `${section}\n\nPersonal-use macOS 13+ app (Intel and Apple Silicon). Ad-hoc signed, not notarized. Enable unsigned extensions in Safari. Install via \`brew install --cask markrpearce96/tap/dock-for-google\`, or unzip and drag Dock for Google.app to Applications.\n`);
           appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\n`);
           JS
 
-      - name: Test, build, and verify DMG
+      - name: Test, build, and verify zip
         run: npm run release
+
+      - name: Record sha256 for the Homebrew Cask
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          SHA256=$(shasum -a 256 "dist/$RELEASE_TAG-zip/"*.zip | cut -d' ' -f1)
+          echo "sha256: $SHA256" >> "$RUNNER_TEMP/release-notes.md"
 
       # Upload straight to Releases; no Actions artifacts or persistent caches.
       - name: Upload and publish GitHub release
@@ -81,7 +88,7 @@ jobs:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           gh release create "$RELEASE_TAG" \
-            "dist/$RELEASE_TAG-dmg/"*.dmg \
+            "dist/$RELEASE_TAG-zip/"*.zip \
             --verify-tag \
             --title "Dock for Google $RELEASE_TAG" \
             --notes-file "$RUNNER_TEMP/release-notes.md" \

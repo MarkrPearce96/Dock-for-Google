@@ -1,14 +1,45 @@
 # Installing Dock for Google in Safari
 
+## Via Homebrew
+
+```bash
+brew tap markrpearce96/tap
+brew install --cask dock-for-google
+```
+
+The first `brew install` from this tap prompts a one-time
+`brew trust markrpearce96/tap` (or `brew trust --cask markrpearce96/tap/dock-for-google`)
+confirmation — Homebrew gates casks from third-party taps behind this step.
+Approve it to continue. The Cask is unsigned (ad-hoc, not notarized); see the
+Gatekeeper step below after installing.
+
+To update: `brew upgrade --cask dock-for-google`. To remove it along with most
+of its saved state: `brew uninstall --zap dock-for-google`.
+
+`--zap` removes the app's preferences, caches, and sandbox container data, but
+macOS itself protects the sandbox container's own metadata file from deletion
+by any process, including a direct `rm -rf` in Terminal — you'll see
+"Operation not permitted" on `.com.apple.containermanagerd.metadata.plist`.
+Granting your terminal app Full Disk Access first (System Settings → Privacy
+& Security → Full Disk Access) lets `--zap` remove it too. Safari also keeps
+its own separate record of the extension inside Safari's own container,
+which `--zap` does not reach; it's harmless left behind, but if you want it
+gone, remove it manually after uninstalling.
+
 ## From a personal release app
 
-Download and open `Dock-for-Google-VERSION.dmg`, drag
-**Dock for Google.app** onto the Applications shortcut, then eject the DMG.
-Open the app from Applications once to register the
+Download `Dock-for-Google-VERSION.zip`, unzip it (double-click, or your browser
+unzips it automatically), then drag **Dock for Google.app** to your Applications
+folder. Open the app from Applications once to register the
 extension. The locally packaged app targets macOS 13 or newer and includes Intel
 and Apple Silicon code. It is ad-hoc signed for personal testing, not notarized.
-If macOS blocks a trusted copy you built, review it under System Settings →
-Privacy & Security. Do not disable system-wide security protections.
+On first launch Gatekeeper will likely block it as from an "unidentified
+developer" — this is expected for an ad-hoc-signed, non-notarized app, not a
+sign anything is wrong. Open it once anyway: go to System Settings → Privacy
+& Security, scroll down, and click **Open Anyway** next to the warning (only
+needed once per install). Right-click → Open does not reliably bypass this on
+current macOS, so use the System Settings route. Do not disable system-wide
+security protections.
 
 Enable Safari's developer features under Settings → Advanced → **Show features
 for web developers**, then enable **Allow unsigned extensions** in Safari's
@@ -36,7 +67,7 @@ and run from the extracted repository root:
 npm run release
 ```
 
-The DMG appears in `dist/vVERSION-dmg/`. See [RELEASE.md](RELEASE.md).
+The zip appears in `dist/vVERSION-zip/`. See [RELEASE.md](RELEASE.md).
 A free Apple ID does not guarantee permanently enabled Safari extensions;
 signing and distribution depend on the available Apple certificates and Safari's
 requirements. See [Apple's signing guidance](https://developer.apple.com/documentation/safariservices/building-a-safari-app-extension).

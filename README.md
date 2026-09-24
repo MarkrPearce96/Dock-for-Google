@@ -15,7 +15,11 @@ A searchable grid launcher for your favorite web apps, built as a **Safari Web E
 
 ## Install (Safari, macOS)
 
-Download a personal release app, or build the included Xcode project locally.
+```bash
+brew install --cask markrpearce96/tap/dock-for-google
+```
+
+Or download a personal release app, or build the included Xcode project locally.
 See **[docs/INSTALL.md](docs/INSTALL.md)** for installation and Safari's unsigned
 extension settings. Personal release builds are ad-hoc signed, not notarized.
 Export your shortcuts and settings before moving to another Mac.
@@ -23,7 +27,7 @@ Export your shortcuts and settings before moving to another Mac.
 ## GitHub releases
 
 Push a version tag such as **`v1.0.0`** to your repository. GitHub tests and builds the app, then
-publishes a release with a single DMG installer.
+publishes a release with a single zip archive, and the Homebrew Cask points at that same asset.
 
 The workflow runs **only on version-tag pushes**: one macOS job, a 15-minute timeout,
 no caches, no builds on ordinary code pushes, and no Actions artifact storage. Release builds
@@ -32,7 +36,7 @@ use GitHub Actions minutes. See **[docs/RELEASE.md](docs/RELEASE.md)** for detai
 You can also build locally with macOS and Node.js 22+:
 
 ```bash
-npm run release             # build and verify the DMG using Xcode
+npm run release             # build and verify the zip using Xcode
 ```
 
 ## Development
